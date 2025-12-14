@@ -6,9 +6,10 @@ import { PatientInfoForm } from '@/components/forms/PatientInfoForm'
 import { MedicalHistorySelector } from '@/components/forms/MedicalHistorySelector'
 import { SymptomSelector } from '@/components/forms/SymptomSelector'
 import { ClinicalCourseForm } from '@/components/forms/ClinicalCourseForm'
+import { RiskAssessmentForm } from '@/components/forms/RiskAssessmentForm'
 import { ExaminationInput } from '@/components/upload/ExaminationInput'
 import { Button } from '@/components/ui/button'
-import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination } from '@/types'
+import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination, RiskAssessment } from '@/types'
 import { EXAMINATION_LABELS } from '@/types'
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
     updateSymptomOnset,
     updateClinicalCourse,
     addExamination,
+    updateRiskAssessment,
   } = useCaseStore()
 
   // 初始化案例
@@ -53,6 +55,11 @@ export default function Home() {
 
   const handleExaminationSubmit = (examination: Examination) => {
     addExamination(examination)
+  }
+
+  const handleRiskAssessmentSubmit = (data: RiskAssessment) => {
+    updateRiskAssessment(data)
+    alert('風險評估已儲存')
   }
 
   if (!currentCase) {
@@ -170,6 +177,20 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </section>
+
+          {/* 步驟 6: 風險評估與手術評估 */}
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-700">步驟 6：手術風險評估與適應症</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                請填寫 STS Score、外科醫師評估、NYHA 分級及手術適應症
+              </p>
+            </div>
+            <RiskAssessmentForm
+              defaultValues={currentCase.riskAssessment}
+              onSubmit={handleRiskAssessmentSubmit}
+            />
           </section>
 
           {/* 下一步提示 */}

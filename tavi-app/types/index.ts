@@ -187,11 +187,23 @@ export interface Examination {
   notes?: string // 備註
 }
 
+// NYHA 心功能分級
+export type NYHAClass = 'I' | 'II' | 'III' | 'IV'
+
+export const NYHA_LABELS: Record<NYHAClass, string> = {
+  'I': 'Class I - 無症狀',
+  'II': 'Class II - 輕度活動受限',
+  'III': 'Class III - 明顯活動受限',
+  'IV': 'Class IV - 休息時也有症狀',
+}
+
 // 手術風險評估
 export interface RiskAssessment {
-  stsScore: number // STS Score
+  stsScore?: string // STS Score 百分比（文字，例如：>10%）
   surgeon1: string // 第一位外科醫師
   surgeon2: string // 第二位外科醫師
+  nyhaClass?: NYHAClass // NYHA 心功能分級
+  urgencyReason?: string // 手術緊急性/適應症說明
 }
 
 // 完整案例資料

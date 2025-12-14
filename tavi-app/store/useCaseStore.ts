@@ -86,7 +86,6 @@ export const useCaseStore = create<CaseStore>()(
             },
             examinations: [],
             riskAssessment: {
-              stsScore: 0,
               surgeon1: '',
               surgeon2: '',
             },
