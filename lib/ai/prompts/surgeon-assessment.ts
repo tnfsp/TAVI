@@ -77,7 +77,7 @@ ${symptomsList.join('、')}
   const examinationsInfo = examinations.map((exam: any) => {
     let summary = `\n${getExaminationTypeName(exam.type)}：`;
     if (exam.date) summary += `日期 ${exam.date}`;
-    if (exam.text) summary += `\n${exam.text.substring(0, 200)}...`; // 取前200字
+    if (exam.textContent) summary += `\n${exam.textContent.substring(0, 200)}...`; // 取前200字
     if (exam.extractedData) {
       summary += `\n关键数据：${JSON.stringify(exam.extractedData)}`;
     }
@@ -135,14 +135,17 @@ function getExaminationTypeName(type: string): string {
     'echocardiography': '心脏超音波检查',
     'catheterization': '心导管检查',
     'ekg': '心电图 (EKG)',
-    'chest-xray': '胸部 X 光 (Chest X-ray)',
+    'chest-xray': '胸部 X 光 (CXR)',
     'pulmonary-function': '肺功能检查',
     'abi': '四肢血流探测 (ABI)',
     'heart-ct': 'Heart CT',
-    'physiological': '生理测量',
+    'myocardial-perfusion-scan': '心肌灌注扫描',
+    'vital-signs': '生理测量',
     'lab-report': '检验报告',
     'medical-record': '就医纪录',
-    'medication': '就医用药',
+    'medication-record': '就医用药',
+    'list-of-diagnosis': 'List of Diagnosis',
+    'assessment-and-plan': 'Assessment and Plan',
     'sts-score': 'STS Score',
   };
   return typeMap[type] || type;

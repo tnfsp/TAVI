@@ -73,10 +73,13 @@ export type ExaminationType =
   | 'pulmonary-function'      // 肺功能檢查
   | 'abi'                     // 四肢血流探測
   | 'heart-ct'                // Heart CT
+  | 'myocardial-perfusion-scan' // 心肌灌注掃描
   | 'vital-signs'             // 生理測量
   | 'lab-report'              // 檢驗報告
   | 'medical-record'          // 就醫紀錄
   | 'medication-record'       // 就醫用藥
+  | 'list-of-diagnosis'       // List of Diagnosis
+  | 'assessment-and-plan'     // Assessment and Plan
   | 'sts-score'               // STS Score
 
 // 檢查類型標籤
@@ -88,10 +91,13 @@ export const EXAMINATION_LABELS: Record<ExaminationType, string> = {
   'pulmonary-function': '肺功能檢查',
   'abi': '四肢血流探測（ABI）',
   'heart-ct': 'Heart CT',
+  'myocardial-perfusion-scan': '心肌灌注掃描',
   'vital-signs': '生理測量',
   'lab-report': '檢驗報告',
   'medical-record': '就醫紀錄',
   'medication-record': '就醫用藥',
+  'list-of-diagnosis': 'List of Diagnosis',
+  'assessment-and-plan': 'Assessment and Plan',
   'sts-score': 'STS Score',
 }
 
@@ -139,6 +145,11 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
     hasImages: false,
     placeholder: '請貼上 Heart CT 報告內容...',
   },
+  'myocardial-perfusion-scan': {
+    hasText: true,
+    hasImages: true,
+    placeholder: '請貼上心肌灌注掃描報告內容...',
+  },
   'vital-signs': {
     hasText: true,
     hasImages: false,
@@ -155,6 +166,16 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
   'medication-record': {
     hasText: false,
     hasImages: true,
+  },
+  'list-of-diagnosis': {
+    hasText: true,
+    hasImages: false,
+    placeholder: '請貼上診斷列表內容...',
+  },
+  'assessment-and-plan': {
+    hasText: true,
+    hasImages: false,
+    placeholder: '請貼上評估與計畫內容...',
   },
   'sts-score': {
     hasText: true,
