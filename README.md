@@ -1,100 +1,36 @@
-# Claude Code 專案模板
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-這是一個使用 Claude Code 進行開發的專案模板框架。透過 Subagent 架構，讓 AI 協助你從概念設計到專案完成。
+## Getting Started
 
-## 快速開始
+First, run the development server:
 
-### 1. 複製此模板
-將此資料夾複製到你的新專案目錄。
-
-### 2. 啟動 Claude Code
 ```bash
-cd your-project
-claude
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### 3. 開始設計專案
-```
-/concept
-```
-與 Concept 設計師討論你的專案概念、需求與技術選擇。
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### 4. 規劃與執行
-```
-/pm
-```
-讓 Project Manager 建立實作計畫，並協調各個 subagent 完成任務。
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## 架構說明
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```
-.claude/
-├── commands/           # Subagent 指令
-│   ├── concept.md      # 概念設計師 - 負責 PRD、技術棧設計
-│   └── pm.md           # 專案經理 - 負責規劃、調度、追蹤
-├── docs/               # 專案文件
-│   ├── PRD.md          # 產品需求文件
-│   ├── TECHSTACK.md    # 技術棧說明
-│   └── IMPLEMENTATION-PLAN.md  # 實作計畫
-└── logs/
-    └── SESSION-LOG.md  # 工作記錄（每次 session 累積）
+## Learn More
 
-CLAUDE.md               # Claude Code 讀取的專案說明
-README.md               # 本檔案（給人類讀取）
-```
+To learn more about Next.js, take a look at the following resources:
 
-## 工作流程
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-```
-1. /concept  →  討論專案概念，產出 PRD + TECHSTACK
-        ↓
-2. /pm       →  制定 IMPLEMENTATION-PLAN，建立需要的 subagent
-        ↓
-3. /xxx      →  PM 調動各 subagent 執行任務
-        ↓
-4. 更新 Log  →  記錄進度，方便接力開發
-        ↓
-5. Git Push  →  保存變更
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Subagent 說明
+## Deploy on Vercel
 
-### /concept - 概念設計師
-- 與你討論專案的目標、功能、用戶
-- 撰寫與維護 PRD（產品需求文件）
-- 決定技術棧，撰寫 TECHSTACK
-- 設計專案需要的其他 subagent
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### /pm - 專案經理
-- 根據 PRD 撰寫實作計畫
-- 動態建立新的 subagent（如 /coder, /tester）
-- 調度 subagent 完成任務
-- 追蹤進度，維護 log
-
-### 動態 Subagent
-PM 可根據專案需求建立其他 subagent，例如：
-- `/coder` - 撰寫程式碼
-- `/tester` - 撰寫測試
-- `/reviewer` - Code review
-- `/devops` - 部署相關
-
-## Log 系統
-
-每次使用 Claude Code 工作後，會在 `.claude/logs/SESSION-LOG.md` 記錄：
-- **變更摘要**：完成了什麼
-- **決策記錄**：做了什麼決定、為什麼
-- **待辦事項**：下次要繼續的工作
-
-這讓你可以隨時中斷，下次繼續接力開發。
-
-## 自訂與擴展
-
-### 新增 Subagent
-在 `.claude/commands/` 建立新的 `.md` 檔案即可。
-
-### 修改流程
-編輯 `CLAUDE.md` 或各 subagent 的 `.md` 檔案來調整行為。
-
-## License
-
-MIT
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
