@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
       patientInfo.chartNumber
     );
 
-    // 返回檔案
-    return new NextResponse(buffer, {
+    // 返回檔案（轉換 Buffer 為 Uint8Array）
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         'Content-Type':
