@@ -6,9 +6,10 @@ import { PatientInfoForm } from '@/components/forms/PatientInfoForm'
 import { MedicalHistorySelector } from '@/components/forms/MedicalHistorySelector'
 import { SymptomSelector } from '@/components/forms/SymptomSelector'
 import { ClinicalCourseForm } from '@/components/forms/ClinicalCourseForm'
-import { ImageUploader } from '@/components/upload/ImageUploader'
+import { ExaminationInput } from '@/components/upload/ExaminationInput'
 import { Button } from '@/components/ui/button'
-import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, ExaminationType } from '@/types'
+import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination } from '@/types'
+import { EXAMINATION_LABELS } from '@/types'
 
 export default function Home() {
   const {
@@ -50,18 +51,8 @@ export default function Home() {
     alert('就醫歷程已儲存')
   }
 
-  const handleImageCapture = (imageData: string, examType: ExaminationType) => {
-    const examination = {
-      id: `exam-${Date.now()}`,
-      type: examType,
-      date: new Date().toISOString().split('T')[0],
-      imageUrl: imageData,
-      data: examType === 'echocardiography'
-        ? { AVA: null, Vmax: null, PeakPG: null, MeanPG: null, LVEF: null }
-        : { AVA: null, MeanGradient: null },
-    }
+  const handleExaminationSubmit = (examination: Examination) => {
     addExamination(examination)
-    alert('檢查報告已上傳！（AI 數據提取功能將在 Phase 2 實作）')
   }
 
   if (!currentCase) {
@@ -151,29 +142,29 @@ export default function Home() {
           {/* 步驟 5: 檢查報告上傳 */}
           <section>
             <div className="mb-4">
-              <h2 className="text-lg font-semibold text-gray-700">步驟 5：檢查報告上傳</h2>
+              <h2 className="text-lg font-semibold text-gray-700">步驟 5：檢查報告輸入</h2>
               <p className="text-sm text-gray-500 mt-1">
-                請上傳心臟超音波或心導管檢查報告（可多次上傳不同檢查）
+                請選擇檢查類型，並上傳圖片或輸入報告內容（可多次上傳不同檢查）
               </p>
             </div>
-            <ImageUploader onImageCapture={handleImageCapture} />
+            <ExaminationInput onSubmit={handleExaminationSubmit} />
 
             {/* 已上傳的檢查列表 */}
             {currentCase.examinations.length > 0 && (
               <div className="mt-6 bg-white rounded-lg border p-6">
-                <h3 className="text-base font-semibold mb-4">已上傳的檢查 ({currentCase.examinations.length})</h3>
+                <h3 className="text-base font-semibold mb-4">已輸入的檢查 ({currentCase.examinations.length})</h3>
                 <div className="space-y-3">
                   {currentCase.examinations.map((exam) => (
                     <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                       <div>
                         <span className="font-medium">
-                          {exam.type === 'echocardiography' ? '心臟超音波' : '心導管檢查'}
+                          {EXAMINATION_LABELS[exam.type]}
                         </span>
                         <span className="text-sm text-gray-500 ml-2">
                           ({exam.date})
                         </span>
                       </div>
-                      <span className="text-sm text-green-600">✓ 已上傳</span>
+                      <span className="text-sm text-green-600">✓ 已儲存</span>
                     </div>
                   ))}
                 </div>

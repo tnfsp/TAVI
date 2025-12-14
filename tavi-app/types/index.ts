@@ -64,33 +64,126 @@ export interface ClinicalCourse {
   presentation: string // 就醫經過
 }
 
-// 檢查類型
-export type ExaminationType = 'echocardiography' | 'catheterization'
+// 檢查類型（完整版）
+export type ExaminationType =
+  | 'echocardiography'        // 心臟超音波
+  | 'catheterization'         // 心導管檢查
+  | 'ekg'                     // 心電圖
+  | 'chest-xray'              // 胸部 X 光
+  | 'pulmonary-function'      // 肺功能檢查
+  | 'abi'                     // 四肢血流探測
+  | 'heart-ct'                // Heart CT
+  | 'vital-signs'             // 生理測量
+  | 'lab-report'              // 檢驗報告
+  | 'medical-record'          // 就醫紀錄
+  | 'medication-record'       // 就醫用藥
+  | 'sts-score'               // STS Score
+  | 'surgeon-assessment'      // 外科醫師判定
 
-// 心臟超音波數據
-export interface EchocardiographyData {
-  AVA: string | null // Aortic Valve Area
-  Vmax: string | null // Peak velocity
-  PeakPG: string | null // Peak pressure gradient
-  MeanPG: string | null // Mean pressure gradient
-  LVEF: string | null // Left ventricular ejection fraction
+// 檢查類型標籤
+export const EXAMINATION_LABELS: Record<ExaminationType, string> = {
+  'echocardiography': '心臟超音波檢查',
+  'catheterization': '心導管檢查',
+  'ekg': '心電圖（EKG）',
+  'chest-xray': '胸部 X 光（CXR）',
+  'pulmonary-function': '肺功能檢查',
+  'abi': '四肢血流探測（ABI）',
+  'heart-ct': 'Heart CT',
+  'vital-signs': '生理測量',
+  'lab-report': '檢驗報告',
+  'medical-record': '就醫紀錄',
+  'medication-record': '就醫用藥',
+  'sts-score': 'STS Score',
+  'surgeon-assessment': '外科醫師判定',
 }
 
-// 心導管檢查數據
-export interface CatheterizationData {
-  AVA: string | null
-  MeanGradient: string | null // Mean pressure gradient (AO-LV)
+// 檢查輸入方式配置
+export interface ExaminationInputConfig {
+  hasText: boolean      // 是否需要文字輸入
+  hasImages: boolean    // 是否需要圖片上傳
+  minImages?: number    // 最少圖片數量
+  placeholder?: string  // 文字框提示
 }
 
-// 檢查報告
+export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputConfig> = {
+  'echocardiography': {
+    hasText: true,
+    hasImages: true,
+    minImages: 2,
+    placeholder: '請貼上心臟超音波報告全文...',
+  },
+  'catheterization': {
+    hasText: true,
+    hasImages: false,
+    placeholder: '請貼上心導管檢查報告內容...',
+  },
+  'ekg': {
+    hasText: true,
+    hasImages: true,
+    minImages: 1,
+    placeholder: '請貼上 EKG 報告內容...',
+  },
+  'chest-xray': {
+    hasText: true,
+    hasImages: true,
+    minImages: 1,
+    placeholder: '請貼上胸部 X 光報告內容...',
+  },
+  'pulmonary-function': {
+    hasText: true,
+    hasImages: false,
+    placeholder: '請貼上肺功能檢查報告內容...',
+  },
+  'abi': {
+    hasText: true,
+    hasImages: false,
+    placeholder: '請貼上四肢血流探測報告內容...',
+  },
+  'heart-ct': {
+    hasText: true,
+    hasImages: false,
+    placeholder: '請貼上 Heart CT 報告內容...',
+  },
+  'vital-signs': {
+    hasText: true,
+    hasImages: false,
+    placeholder: '請貼上生理測量數據...',
+  },
+  'lab-report': {
+    hasText: false,
+    hasImages: true,
+    minImages: 1,
+  },
+  'medical-record': {
+    hasText: false,
+    hasImages: true,
+    minImages: 1,
+  },
+  'medication-record': {
+    hasText: false,
+    hasImages: true,
+    minImages: 1,
+  },
+  'sts-score': {
+    hasText: false,
+    hasImages: true,
+    minImages: 1,
+  },
+  'surgeon-assessment': {
+    hasText: false,
+    hasImages: true,
+    minImages: 1,
+  },
+}
+
+// 檢查報告資料結構
 export interface Examination {
   id: string
   type: ExaminationType
   date: string // YYYY-MM-DD
-  imageUrl?: string // base64 或 blob URL
-  data: EchocardiographyData | CatheterizationData
-  confidence?: number // AI 信心度 (0-1)
-  notes?: string
+  textContent?: string // 文字內容（複製貼上）
+  images?: string[] // 圖片陣列（base64 或 URL）
+  notes?: string // 備註
 }
 
 // 手術風險評估
