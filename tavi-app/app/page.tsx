@@ -8,6 +8,7 @@ import { SymptomSelector } from '@/components/forms/SymptomSelector'
 import { ClinicalCourseForm } from '@/components/forms/ClinicalCourseForm'
 import { RiskAssessmentForm } from '@/components/forms/RiskAssessmentForm'
 import { ExaminationInput } from '@/components/upload/ExaminationInput'
+import { SurgeonAssessmentGenerator } from '@/components/document/SurgeonAssessmentGenerator'
 import { Button } from '@/components/ui/button'
 import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination, RiskAssessment } from '@/types'
 import { EXAMINATION_LABELS } from '@/types'
@@ -193,17 +194,28 @@ export default function Home() {
             />
           </section>
 
+          {/* 步驟 7: 生成醫師評估文件 */}
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-700">步驟 7：生成醫師評估文件</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                生成「二位心臟外科專科醫師判定」文件，供醫師簽名使用
+              </p>
+            </div>
+            <SurgeonAssessmentGenerator caseData={currentCase} />
+          </section>
+
           {/* 下一步提示 */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h3 className="text-base font-semibold text-yellow-900 mb-2">🚧 Phase 1 功能展示</h3>
-            <p className="text-yellow-700 text-sm mb-3">
-              目前已完成基礎資料輸入功能。後續階段將實作：
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+            <h3 className="text-base font-semibold text-green-900 mb-2">✅ Phase 2 已完成</h3>
+            <p className="text-green-700 text-sm mb-3">
+              目前已完成基礎資料輸入與醫師評估文件生成功能。後續階段將實作：
             </p>
-            <ul className="list-disc list-inside text-yellow-700 text-sm space-y-1">
-              <li>Phase 2：AI 自動提取檢查報告數據（使用 Claude Vision API）</li>
-              <li>Phase 3：自動生成申請文件</li>
-              <li>Phase 4：匯出 Word 檔案</li>
+            <ul className="list-disc list-inside text-green-700 text-sm space-y-1">
+              <li>Phase 3：上傳已簽名的醫師評估文件</li>
+              <li>Phase 4：生成完整事前審查申請文件（13 個區塊）</li>
               <li>Phase 5：歷史案例管理</li>
+              <li>Phase 6：UI/UX 優化</li>
             </ul>
           </div>
         </div>
