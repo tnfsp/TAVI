@@ -11,7 +11,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { RiskAssessment, NYHAClass } from '@/types'
 import { NYHA_LABELS } from '@/types'
-import { FileText, Users, Activity, AlertCircle } from 'lucide-react'
+import { FileText, Users, Activity, AlertCircle, ExternalLink, Plus } from 'lucide-react'
+
+// 常用手術適應症範本
+const URGENCY_TEMPLATES = [
+  {
+    label: '症狀惡化 + Critical AS',
+    text: '由於呼吸喘及心衰竭症狀越來越嚴重，主動脈瓣膜狹窄的情形(Critical AS)隨時都有猝死的可能。需盡快行經導管主動脈瓣膜置換術(TAVI)來改善症狀。',
+  },
+  {
+    label: 'NYHA III-IV + 傳統手術高風險',
+    text: '病患心功能不佳，已達 NYHA Class III-IV，經兩位心臟外科專科醫師評估傳統主動脈瓣膜手術風險過高，符合健保局經導管主動脈瓣膜置換手術的適應症。',
+  },
+  {
+    label: 'Low flow low gradient',
+    text: '嚴重主動脈瓣膜狹窄且屬於 Low cardiac output, Low pressure gradient，傳統手術風險極高，建議進行經導管主動脈瓣膜置換術(TAVI)。',
+  },
+  {
+    label: '生活品質 + 預後評估',
+    text: '病患平時日常生活在家人協助下可以自理，臨床上判定病人至少有一年以上之存活機率。由於症狀持續惡化，建議盡快進行 TAVI 手術以改善生活品質。',
+  },
+]
 
 const riskAssessmentSchema = z.object({
   stsScore: z.string().min(1, '請輸入 STS Score'),
@@ -52,6 +72,14 @@ export function RiskAssessmentForm({
   })
 
   const nyhaClass = watch('nyhaClass')
+  const urgencyReason = watch('urgencyReason')
+
+  // 插入範本文字
+  const insertTemplate = (text: string) => {
+    const currentText = urgencyReason || ''
+    const newText = currentText ? `${currentText}\n\n${text}` : text
+    setValue('urgencyReason', newText, { shouldValidate: true })
+  }
 
   return (
     <Card>
@@ -81,9 +109,19 @@ export function RiskAssessmentForm({
                 {errors.stsScore.message}
               </p>
             )}
-            <p className="text-sm text-gray-500">
-              請輸入計算好的 STS Score 百分比（可在檢查報告中上傳計算結果截圖）
-            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>請輸入計算好的 STS Score 百分比</span>
+              <span>•</span>
+              <a
+                href="https://riskcalc.sts.org/stswebriskcalc/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+              >
+                開啟 STS Calculator
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
           </div>
 
           {/* 外科醫師評估 */}
@@ -167,15 +205,39 @@ export function RiskAssessmentForm({
           </div>
 
           {/* 手術適應症與緊急性說明 */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="urgencyReason" className="flex items-center gap-2 text-base">
               <AlertCircle className="w-4 h-4" />
               手術適應症與緊急性說明 <span className="text-red-500">*</span>
             </Label>
+
+            {/* 快捷輸入按鈕 */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">快捷輸入：</p>
+              <div className="flex flex-wrap gap-2">
+                {URGENCY_TEMPLATES.map((template, index) => (
+                  <Button
+                    key={index}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => insertTemplate(template.text)}
+                    className="text-xs"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    {template.label}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500">
+                點擊按鈕可快速插入常用說明文字（可自行修改）
+              </p>
+            </div>
+
             <Textarea
               id="urgencyReason"
-              placeholder="例如：由於呼吸喘及心衰竭症狀越來越嚴重，主動脈瓣膜狹窄的情形(Critical AS)隨時都有猝死的可能。需盡快行經導管主動脈瓣膜置換術(TAVI)來改善的症狀。"
-              rows={6}
+              placeholder="請說明為何需要進行 TAVI 手術、症狀嚴重程度、以及手術的緊急性..."
+              rows={8}
               {...register('urgencyReason')}
               aria-describedby={errors.urgencyReason ? 'urgencyReason-error' : undefined}
               className="text-base resize-none"
@@ -185,9 +247,6 @@ export function RiskAssessmentForm({
                 {errors.urgencyReason.message}
               </p>
             )}
-            <p className="text-sm text-gray-500">
-              請說明為何需要進行 TAVI 手術、症狀嚴重程度、以及手術的緊急性
-            </p>
           </div>
 
           <div className="flex justify-end pt-4 border-t">
