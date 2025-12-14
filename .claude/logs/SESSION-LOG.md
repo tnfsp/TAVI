@@ -1089,3 +1089,116 @@ git commit -m "feat: 新增檢查類型與修正驗證錯誤"      # acc6c69
 
 ---
 
+
+## Session: 2025-12-14 21:36
+
+### 變更摘要
+
+本次 Session 主要完成以下重要工作：
+
+#### 1. 🔧 修復 Claude API 模型錯誤
+- **問題**：舊模型 `claude-3-5-sonnet-20241022` 已被棄用，導致 404 錯誤
+- **解決**：更新為最新模型 **Claude Sonnet 4.5** (`claude-sonnet-4-5-20250929`)
+- **檔案**：`lib/ai/claude.ts`
+- **Commit**: `47be9fc`
+
+#### 2. ✨ 新增檢驗報告 Lab Findings 標註功能
+- **功能**：檢驗報告（lab-report）現在支援文字輸入，可標註重要異常數據
+- **實作細節**：
+  - 新增 `labFindings` 欄位到 `Examination` 介面
+  - 更新 `EXAMINATION_INPUT_CONFIG` 配置
+  - 針對 lab-report 顯示專門的標籤：「重要 Lab Findings 標註」
+  - 提供友善的輸入提示（例如：eGFR 偏低、肌酸酐升高等）
+- **檔案**：
+  - `types/index.ts`
+  - `components/upload/ExaminationInput.tsx`
+- **Commit**: `4db0785`
+
+#### 3. 🚀 大幅優化 AI 摘要生成 Prompt
+這是本次 Session 最重要的優化！
+
+**語言修正**：
+- ✅ 全面改為**繁體中文（台灣）**
+- ✅ 病史（History）使用通順的中文表達
+- ✅ 檢查結果用中文描述，關鍵數值用括號標註
+  - 範例：「心臟超音波檢查顯示極重度主動脈瓣膜狹窄（AVA:0.67cm², mean pressure gradient:76mmHg）」
+
+**資料真實性強化**：
+- 🚨 明確要求**絕對不可捏造或臆測**任何資料
+- 📊 只使用使用者提供的真實資料
+- ⚠️ 缺少的資料項目直接省略，切勿編造
+
+**內容品質提升**：
+- 📝 語句更通順自然，符合台灣醫療文書習慣
+- 🎯 專業但不生硬，易於閱讀理解
+- ✅ 符合健保局審查標準
+
+**資料處理優化**：
+- 📅 自動轉換為民國年日期格式（新增 `formatToROCDate` 函數）
+- 🔍 從檢查報告中智能提取關鍵數據（AVA、Vmax、Peak PG、Mean PG）
+- 🏥 只顯示關鍵檢查（心臟超音波、心導管、Heart CT）
+
+**檔案**：`lib/ai/prompts/surgeon-assessment.ts`（完全重寫）
+**Commits**:
+- `be103f8` - 大幅優化 AI 摘要生成 Prompt
+- `c35506f` - 優化檢查結果呈現格式
+
+#### 4. 📋 補充完整檢查類型文檔
+- **問題**：之前文檔漏掉了 4 個檢查類型
+- **補充**：肺功能檢查、四肢血流探測（ABI）、心肌灌注掃描、就醫用藥
+- **更新**：`.claude/docs/COMPLETE-APPLICATION-TEMPLATE.md`
+  - 完整 17 個區塊結構
+  - 資料來源對應表
+  - Phase 4 實作步驟
+- **Commit**: `bbe7ead`
+
+### 決策記錄
+
+#### 1. Claude API 模型選擇
+- **決策**：使用 Claude Sonnet 4.5 (`claude-sonnet-4-5-20250929`)
+- **原因**：舊模型已被官方棄用，新模型效能更好
+
+#### 2. AI Prompt 語言策略
+- **決策**：病史和檢查結果都用中文，關鍵數值保持英文術語
+- **原因**：使用者要求「通順就好」，符合台灣醫療文書習慣
+
+### 已知問題與限制
+
+#### Claude API 配額限制
+- **狀態**：API 配額已用完
+- **恢復時間**：2026-01-01 00:00 UTC
+- **影響**：無法測試 AI 生成摘要功能
+
+### 部署狀態
+- ✅ **Vercel 部署成功**：https://tavi-seven.vercel.app/
+- ✅ **所有新功能已部署**
+
+### Git 記錄
+本次 Session 共提交 7 個 commits：
+1. `3e1643d` - docs: 新增完整事前審查申請文件範本文檔
+2. `bbe7ead` - fix: 修復年齡欄位驗證並補充完整檢查類型文檔
+3. `eab4a25` - fix: 正確修復年齡欄位 TypeScript 類型問題
+4. `47be9fc` - fix: 更新 Claude API 模型 ID 為 Sonnet 4.5
+5. `4db0785` - feat: 新增檢驗報告重要 Lab Findings 標註功能
+6. `be103f8` - feat: 大幅優化 AI 摘要生成 Prompt
+7. `c35506f` - refine: 優化檢查結果呈現格式
+
+### 待辦事項
+#### 立即待辦（配額恢復後）
+- [ ] 測試 AI 生成摘要功能（繁體中文、格式、資料真實性）
+- [ ] 測試檢驗報告 Lab Findings 功能
+
+#### Phase 3（下一階段）
+- [ ] 設計已簽名醫師評估文件上傳功能
+
+#### Phase 4（完整申請文件）
+- [ ] 實作 `lib/docx/complete-application.ts`
+- [ ] 整合所有 17 個區塊
+
+### 專案狀態
+- **Phase 2**: ✅ 完成（AI 摘要生成 - 大幅優化）
+- **Phase 3**: ⏳ 待開始
+- **Phase 4**: ⏳ 待開始
+- **部署**: ✅ https://tavi-seven.vercel.app/
+
+---
