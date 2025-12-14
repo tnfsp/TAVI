@@ -8,7 +8,7 @@
 
 ## 文件結構總覽
 
-完整的 TAVI 事前審查申請文件包含 **12 個主要區塊**：
+完整的 TAVI 事前審查申請文件包含 **13 個主要區塊**（實際區塊數量會根據個案需求調整）：
 
 ### 1. TAVI 事前審查摘要段落（封面）
 
@@ -170,10 +170,58 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 
 ---
 
-### 7. 生理測量資訊
+### 7. 肺功能檢查（Pulmonary Function Test）
 
-**位置**：第 8 頁
-**標題**：「6. 生理測量資訊」
+**標題**：「6. 肺功能檢查」
+**內容**：
+- 醫院名稱 + 報告標題
+- 病患資料
+- 測試項目與數據
+  - FVC (Forced Vital Capacity)
+  - FEV1 (Forced Expiratory Volume in 1 second)
+  - FEV1/FVC ratio
+  - TLC (Total Lung Capacity)
+  - DLCO (Diffusing Capacity)
+- Interpretation（解釋）
+- 報告醫師簽名
+
+---
+
+### 8. 四肢血流探測（ABI Test）
+
+**標題**：「7. 四肢血流探測 (ABI)」
+**內容**：
+- 醫院名稱 + 報告標題
+- 病患資料
+- ABI 測量數據
+  - Right ABI
+  - Left ABI
+- Interpretation
+- 週邊動脈疾病評估
+- 報告醫師簽名
+
+---
+
+### 9. 心肌灌注掃描（Myocardial Perfusion Scan）
+
+**標題**：「8. 心肌灌注掃描」
+**內容**：
+- 醫院名稱 + 核子醫學報告
+- 病患資料
+- 檢查方式（stress/rest protocol）
+- 影像發現
+  - Perfusion defects
+  - Reversibility
+  - Wall motion abnormalities
+- Impression（結論）
+- 報告醫師簽名
+- **附圖**：心肌灌注影像
+
+---
+
+### 10. 生理測量資訊
+
+**標題**：「9. 生理測量資訊」
 **內容**：
 - BMI: 22.9
 - TBSA: 1.54 m2
@@ -183,10 +231,9 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 
 ---
 
-### 8. 檢驗報告
+### 11. 檢驗報告
 
-**位置**：第 8 頁
-**標題**：「7. 檢驗報告」
+**標題**：「10. 檢驗報告」
 **內容**：
 - **附圖**：醫院系統檢驗報告截圖
 - 關鍵數值標註（如：GFR: 58.5）
@@ -194,10 +241,9 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 
 ---
 
-### 9. 就醫紀錄
+### 12. 就醫紀錄
 
-**位置**：第 9 頁
-**標題**：「8. 就醫紀錄」
+**標題**：「11. 就醫紀錄」
 **內容**：
 - 病患背景描述
   - "She is a 85-year-old woman with underlying disease of:"
@@ -207,14 +253,27 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
   - 何時診斷
   - 症狀發展
   - 就醫經過
-- 附圖：醫院系統就醫記錄截圖
+- **附圖**：醫院系統就醫記錄截圖
 
 ---
 
-### 10. List of Diagnosis (Problem List)
+### 13. 就醫用藥（Medication Record）
 
-**位置**：第 9-10 頁
-**標題**：「List of Diagnosis (Problem List)」（用紅字）
+**標題**：「12. 就醫用藥」
+**內容**：
+- **附圖**：醫院系統用藥記錄截圖
+- 包含：
+  - 藥物名稱
+  - 劑量
+  - 頻率
+  - 開始日期
+  - 用藥目的
+
+---
+
+### 14. List of Diagnosis (Problem List)
+
+**標題**：「13. List of Diagnosis (Problem List)」（用紅字）
 **內容**：
 - **主要診斷**
   - # Severe aortic stenosis
@@ -231,10 +290,9 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 
 ---
 
-### 11. Assessment and Plan
+### 15. Assessment and Plan
 
-**位置**：第 10 頁
-**標題**：「Assessment and Plan」（用紅字）
+**標題**：「14. Assessment and Plan」（用紅字）
 **內容**：
 - 針對每個診斷的評估與治療計畫
 - 格式：
@@ -254,10 +312,9 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 
 ---
 
-### 12. STS Score
+### 16. STS Score
 
-**位置**：第 10 頁
-**標題**：「11. STS Score : Risk of Mortality：13.4%」（用黃底紅字標註）
+**標題**：「15. STS Score : Risk of Mortality：13.4%」（用黃底紅字標註）
 **內容**：
 - **附圖**：STS Risk Calculator 網站截圖
   - 顯示完整的計算界面
@@ -268,10 +325,9 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 
 ---
 
-### 13. 二位心臟外科專科醫師判定
+### 17. 二位心臟外科專科醫師判定
 
-**位置**：第 11 頁
-**標題**：「12.二位心臟外科專科醫師判定無法以傳統開心手術進行主動脈瓣膜置換或開刀危險性過高」
+**標題**：「16. 二位心臟外科專科醫師判定無法以傳統開心手術進行主動脈瓣膜置換或開刀危險性過高」
 **內容**：
 - **附件**：已簽名的醫師評估文件掃描檔
 - 包含：
@@ -297,13 +353,17 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 | 4. EKG | examinations (type: ekg) | ❌ 直接貼上 |
 | 5. Chest X-ray | examinations (type: chest-xray) | ❌ 直接貼上 |
 | 6. Heart CT | examinations (type: heart-ct) | ❌ 直接貼上 |
-| 7. 生理測量 | examinations (type: vital-signs) | ❌ 直接貼上 |
-| 8. 檢驗報告 | examinations (type: lab-report) | ❌ 圖片 |
-| 9. 就醫紀錄 | examinations (type: medical-record) | ❌ 圖片 |
-| 10. List of Diagnosis | examinations (type: list-of-diagnosis) | ❌ 直接貼上 |
-| 11. Assessment and Plan | examinations (type: assessment-and-plan) | ❌ 直接貼上 |
-| 12. STS Score | examinations (type: sts-score) + riskAssessment.stsScore | ❌ 文字+圖片 |
-| 13. 醫師判定 | Phase 3 上傳的已簽名文件 | ❌ 圖片 |
+| 7. 肺功能檢查 | examinations (type: pulmonary-function) | ❌ 直接貼上 |
+| 8. 四肢血流探測 | examinations (type: abi) | ❌ 直接貼上 |
+| 9. 心肌灌注掃描 | examinations (type: myocardial-perfusion-scan) | ❌ 文字+圖片 |
+| 10. 生理測量 | examinations (type: vital-signs) | ❌ 直接貼上 |
+| 11. 檢驗報告 | examinations (type: lab-report) | ❌ 圖片 |
+| 12. 就醫紀錄 | examinations (type: medical-record) | ❌ 圖片 |
+| 13. 就醫用藥 | examinations (type: medication-record) | ❌ 圖片 |
+| 14. List of Diagnosis | examinations (type: list-of-diagnosis) | ❌ 直接貼上 |
+| 15. Assessment and Plan | examinations (type: assessment-and-plan) | ❌ 直接貼上 |
+| 16. STS Score | examinations (type: sts-score) + riskAssessment.stsScore | ❌ 文字+圖片 |
+| 17. 醫師判定 | Phase 3 上傳的已簽名文件 | ❌ 圖片 |
 
 ### 文件格式要點
 
@@ -328,7 +388,7 @@ Post thyroidectomy、Left ICA 50~70% Stenosis，在門診追蹤治療；
 
 ### 階段 1：文件生成邏輯
 - [ ] 建立 `lib/docx/complete-application.ts`
-- [ ] 設計 Word 文件結構（13 個區塊）
+- [ ] 設計 Word 文件結構（17 個區塊，根據個案實際需求動態調整）
 - [ ] 實作文字內容插入
 - [ ] 實作圖片插入（base64 → Word 圖片）
 
