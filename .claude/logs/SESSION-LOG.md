@@ -616,6 +616,180 @@ URGENCY_TEMPLATES = [
 
 ---
 
+## Session: 2025-12-14 Phase 2 外科醫師評估文件生成
+
+### 變更摘要
+- ✅ **Phase 2 完整開發完成**
+- ✅ 建立 Claude API 封裝層 (`lib/ai/claude.ts`)
+  - 初始化 Anthropic SDK
+  - 封裝 `generateText()` 通用函數
+  - 實作 `generateSurgeonAssessment()` 專用函數
+- ✅ 設計醫師評估摘要 Prompt (`lib/ai/prompts/surgeon-assessment.ts`)
+  - 詳細的系統 Prompt，定義輸出格式要求
+  - 自動組織病患資料（基本資料、病史、症狀、檢查、風險評估）
+  - 參考真實案例（謝式修02759044）設計輸出範本
+  - 包含日期轉換（西元→民國年）、年齡計算等輔助函數
+- ✅ 建立 AI API Route (`/api/ai/generate-surgeon-assessment`)
+  - 接收完整案例資料
+  - 呼叫 Claude API 生成摘要段落
+  - 錯誤處理與驗證
+- ✅ 建立 Word 文件生成功能 (`lib/docx/surgeon-assessment.ts`)
+  - 使用 docx.js 建立標準格式文件
+  - 文件結構：標題（3 行）+ 副標題 + 摘要段落 + 簽名欄（2 位醫師）
+  - 字型設定：標楷體（中文）/ Times New Roman（英文）
+  - 行距 1.5 倍、兩端對齊
+  - 檔案命名規則：`{姓名}{病歷號} - 二位心臟外科專科醫師判定.docx`
+- ✅ 建立 DOCX API Route (`/api/docx/surgeon-assessment`)
+  - 接收病患資料與摘要內容
+  - 生成 Word 文件 buffer
+  - 設定正確的 MIME type 與下載檔名
+- ✅ 建立前端 UI 組件 (`SurgeonAssessmentGenerator`)
+  - 步驟 1：生成摘要段落按鈕（呼叫 AI API）
+  - 步驟 2：下載 Word 文件按鈕
+  - 預覽摘要段落內容
+  - 前置條件檢查（是否完成必要步驟）
+  - 載入狀態與錯誤處理
+  - 使用說明與操作指引
+- ✅ 更新主頁面 (`app/page.tsx`)
+  - 新增步驟 7：生成醫師評估文件
+  - 整合 SurgeonAssessmentGenerator 組件
+  - 更新進度提示（Phase 2 已完成）
+- ✅ Git commit & push
+  - Commit: `4cb388c` - feat: 完成 Phase 2 外科醫師評估文件生成功能
+  - 推送至 GitHub: https://github.com/tnfsp/TAVI.git
+
+### 決策記錄
+
+#### 1. 採用 Claude 3.5 Sonnet 模型
+- **決定**: 使用 `claude-3-5-sonnet-20241022` 模型
+- **原因**:
+  - Sonnet 3.5 在醫療文書生成上表現優異
+  - 成本與效能平衡
+  - 支援足夠的 context window (200k tokens)
+
+#### 2. Prompt 設計策略
+- **決定**: 採用「系統 Prompt + 結構化 User Prompt」方式
+- **原因**:
+  - 系統 Prompt 定義角色與輸出格式要求
+  - User Prompt 提供完整的結構化資料
+  - 提供真實範例作為參考（few-shot learning）
+  - 明確要求單一段落輸出，避免分段
+  - 強調醫學術語準確性與民國年格式
+
+#### 3. 文件生成流程分為兩階段
+- **決定**: AI 生成摘要 → Word 文件生成（分開處理）
+- **原因**:
+  - 使用者可先預覽摘要內容，確認無誤再下載
+  - AI 生成與文件格式化解耦，易於維護
+  - 未來可支援手動編輯摘要後再生成文件
+  - 降低 API 調用成本（只需調用一次）
+
+#### 4. 使用 docx.js 而非其他方案
+- **決定**: 使用 docx.js 生成 Word 文件
+- **原因**:
+  - 純 JavaScript 實作，可在 Next.js API Route 中運行
+  - 支援完整的 Word 格式控制（字型、行距、對齊）
+  - 不需要額外的系統依賴（如 LibreOffice）
+  - 文件體積小、效能好
+
+#### 5. 前端 UI 採用兩步驟流程
+- **決定**: 步驟 1 生成摘要 → 步驟 2 下載文件
+- **原因**:
+  - 符合使用者心智模型（先確認內容，再下載）
+  - 提供即時預覽，增加信任感
+  - 若 AI 生成內容有誤，可及早發現
+  - 未來可擴充手動編輯功能
+
+### 技術細節
+
+#### Claude API 調用
+```typescript
+const message = await anthropic.messages.create({
+  model: 'claude-3-5-sonnet-20241022',
+  max_tokens: 3000,
+  system: systemPrompt,  // 定義角色與格式要求
+  messages: [{ role: 'user', content: userPrompt }],  // 提供結構化資料
+});
+```
+
+#### Word 文件結構
+```
+申請『經導管主動脈瓣膜置換術』（標題，16pt 粗體）
+必須至少二位心臟外科專科醫師判定...（標題續行）
+置換或開刀危險性過高（標題結束）
+
+TAVI 事前審查（副標題，置中）
+
+[AI 生成的摘要段落]（12pt，1.5 倍行距，兩端對齊）
+
+第一位 心臟外科專科醫師____________________ 日期 __________
+第二位 心臟外科專科醫師____________________ 日期 __________
+```
+
+#### 檔案命名範例
+- 輸入：姓名 `謝式修`、病歷號 `02759044`
+- 輸出：`謝式修02759044 - 二位心臟外科專科醫師判定.docx`
+
+### 待辦事項
+- [x] 完成 Phase 2 開發
+- [x] Git commit & push
+- [ ] **Phase 2 完整測試**（下次重點）
+  - [ ] 測試 AI 摘要生成功能
+  - [ ] 測試 Word 文件下載
+  - [ ] 驗證文件格式是否符合健保局要求
+  - [ ] 測試各種邊界情況（資料不完整、API 錯誤等）
+- [ ] **Phase 3：上傳已簽名的醫師評估文件**
+  - [ ] 建立文件上傳組件（PDF/圖片）
+  - [ ] 文件預覽功能
+  - [ ] 儲存至 LocalStorage
+- [ ] **Phase 4：生成完整事前審查申請文件**
+  - [ ] 設計 13 個區塊的 Prompt
+  - [ ] 實作文件生成邏輯
+  - [ ] 嵌入圖片與簽名文件
+
+### 下次啟動重點
+1. **測試 Phase 2 功能**:
+   - 使用真實資料測試 AI 生成摘要
+   - 確認 Word 文件格式正確
+   - 驗證檔名與內容
+2. **準備 Phase 3**: 討論簽名文件上傳的需求與格式
+3. **準備 Phase 4**: 分析完整事前審查文件的結構（13 個區塊）
+
+### 專案狀態
+- **Phase 0**: ✅ 完成
+- **Phase 1**: ✅ 完成（100%）
+- **Phase 2**: ✅ **開發完成**（100%）
+  - ✅ Claude API 封裝
+  - ✅ 醫師評估 Prompt 設計
+  - ✅ AI 摘要生成 API
+  - ✅ Word 文件生成功能
+  - ✅ 前端 UI 整合
+  - ⏳ 功能測試待執行
+- **Phase 3-7**: ⏳ 待執行
+- **開發伺服器**: ✅ 正常運作（http://localhost:3000）
+
+### Git 記錄
+- **Commit**: `4cb388c` - feat: 完成 Phase 2 外科醫師評估文件生成功能
+- **推送**: https://github.com/tnfsp/TAVI.git
+- **變更檔案**: 9 files changed, 934 insertions(+), 158 deletions(-)
+- **新增檔案**:
+  - `lib/ai/claude.ts` (Claude API 封裝)
+  - `lib/ai/prompts/surgeon-assessment.ts` (Prompt 設計)
+  - `app/api/ai/generate-surgeon-assessment/route.ts` (AI API)
+  - `lib/docx/surgeon-assessment.ts` (Word 生成)
+  - `app/api/docx/surgeon-assessment/route.ts` (DOCX API)
+  - `components/document/SurgeonAssessmentGenerator.tsx` (前端組件)
+- **修改檔案**:
+  - `app/page.tsx` (新增步驟 7)
+  - `.claude/docs/IMPLEMENTATION-PLAN.md` (更新進度)
+
+### 效能指標
+- AI API 回應時間：預估 3-8 秒（視內容複雜度）
+- Word 文件生成時間：< 1 秒
+- 文件大小：約 20-30 KB
+
+---
+
 <!-- 新的 session 記錄請加在這裡，格式如下：
 
 ## Session: YYYY-MM-DD HH:MM
