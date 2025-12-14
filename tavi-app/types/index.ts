@@ -107,7 +107,6 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
   'echocardiography': {
     hasText: true,
     hasImages: true,
-    minImages: 2,
     placeholder: '請貼上心臟超音波報告全文...',
   },
   'catheterization': {
@@ -118,13 +117,11 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
   'ekg': {
     hasText: true,
     hasImages: true,
-    minImages: 1,
     placeholder: '請貼上 EKG 報告內容...',
   },
   'chest-xray': {
     hasText: true,
     hasImages: true,
-    minImages: 1,
     placeholder: '請貼上胸部 X 光報告內容...',
   },
   'pulmonary-function': {
@@ -150,22 +147,18 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
   'lab-report': {
     hasText: false,
     hasImages: true,
-    minImages: 1,
   },
   'medical-record': {
     hasText: false,
     hasImages: true,
-    minImages: 1,
   },
   'medication-record': {
     hasText: false,
     hasImages: true,
-    minImages: 1,
   },
   'sts-score': {
     hasText: true,
     hasImages: true,
-    minImages: 1,
     placeholder: '請輸入 STS Score 百分比（例如：5.2）',
   },
 }
@@ -206,7 +199,9 @@ export interface CaseData {
   updatedAt: string
   patient: PatientInfo
   medicalHistory: MedicalHistoryType[]
+  customHistory: string // 自訂病史（其他）
   symptoms: SymptomType[]
+  customSymptoms: string // 自訂症狀（其他）
   symptomOnset: string // 症狀發生時間描述
   clinicalCourse: ClinicalCourse
   examinations: Examination[]

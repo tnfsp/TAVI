@@ -19,7 +19,9 @@ export default function Home() {
     initializeCase,
     updatePatientInfo,
     updateMedicalHistory,
+    updateCustomHistory,
     updateSymptoms,
+    updateCustomSymptoms,
     updateSymptomOnset,
     updateClinicalCourse,
     addExamination,
@@ -38,8 +40,9 @@ export default function Home() {
     alert('病患基本資料已儲存')
   }
 
-  const handleMedicalHistorySubmit = (selected: MedicalHistoryType[]) => {
-    updateMedicalHistory(selected)
+  const handleMedicalHistorySubmit = (data: { selected: MedicalHistoryType[]; customHistory: string }) => {
+    updateMedicalHistory(data.selected)
+    updateCustomHistory(data.customHistory)
     alert('病史已儲存')
   }
 
@@ -118,6 +121,7 @@ export default function Home() {
             </div>
             <MedicalHistorySelector
               defaultValues={currentCase.medicalHistory}
+              defaultCustomHistory={currentCase.customHistory}
               onSubmit={handleMedicalHistorySubmit}
             />
           </section>

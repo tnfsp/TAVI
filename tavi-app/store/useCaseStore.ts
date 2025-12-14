@@ -23,8 +23,14 @@ interface CaseStore {
   // 更新病史
   updateMedicalHistory: (history: MedicalHistoryType[]) => void
 
+  // 更新自訂病史
+  updateCustomHistory: (customHistory: string) => void
+
   // 更新症狀
   updateSymptoms: (symptoms: SymptomType[]) => void
+
+  // 更新自訂症狀
+  updateCustomSymptoms: (customSymptoms: string) => void
 
   // 更新症狀發生時間
   updateSymptomOnset: (onset: string) => void
@@ -78,7 +84,9 @@ export const useCaseStore = create<CaseStore>()(
               nationalId: '',
             },
             medicalHistory: [],
+            customHistory: '',
             symptoms: [],
+            customSymptoms: '',
             symptomOnset: '',
             clinicalCourse: {
               previousCare: '',
@@ -117,12 +125,34 @@ export const useCaseStore = create<CaseStore>()(
             : null,
         })),
 
+      updateCustomHistory: (customHistory) =>
+        set((state) => ({
+          currentCase: state.currentCase
+            ? {
+                ...state.currentCase,
+                customHistory,
+                updatedAt: new Date().toISOString(),
+              }
+            : null,
+        })),
+
       updateSymptoms: (symptoms) =>
         set((state) => ({
           currentCase: state.currentCase
             ? {
                 ...state.currentCase,
                 symptoms,
+                updatedAt: new Date().toISOString(),
+              }
+            : null,
+        })),
+
+      updateCustomSymptoms: (customSymptoms) =>
+        set((state) => ({
+          currentCase: state.currentCase
+            ? {
+                ...state.currentCase,
+                customSymptoms,
                 updatedAt: new Date().toISOString(),
               }
             : null,
