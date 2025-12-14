@@ -156,8 +156,9 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
     placeholder: '請貼上生理測量數據...',
   },
   'lab-report': {
-    hasText: false,
+    hasText: true,
     hasImages: true,
+    placeholder: '請標註重要的 Lab Findings（例如：eGFR: 45 mL/min/1.73m² (偏低)、Creatinine: 1.8 mg/dL (升高)）',
   },
   'medical-record': {
     hasText: false,
@@ -191,6 +192,7 @@ export interface Examination {
   date: string // YYYY-MM-DD
   textContent?: string // 文字內容（複製貼上）
   images?: string[] // 圖片陣列（base64 或 URL）
+  labFindings?: string // 重要 Lab Findings 標註（僅用於 lab-report）
   notes?: string // 備註
 }
 

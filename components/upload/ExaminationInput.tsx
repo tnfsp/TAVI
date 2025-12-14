@@ -156,7 +156,8 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
       id: `exam-${Date.now()}`,
       type: examType,
       date: examDate,
-      textContent: config.hasText ? textContent : undefined,
+      textContent: config.hasText && examType !== 'lab-report' ? textContent : undefined,
+      labFindings: examType === 'lab-report' ? textContent : undefined,
       images: config.hasImages ? images : undefined,
     }
 
@@ -234,7 +235,7 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
             <div className="space-y-2">
               <Label htmlFor="textContent" className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                報告內容
+                {examType === 'lab-report' ? '重要 Lab Findings 標註' : '報告內容'}
                 {config.minImages && config.minImages > 0 && (
                   <span className="text-red-500">*</span>
                 )}
@@ -244,7 +245,7 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
                 placeholder={config.placeholder || '請貼上報告內容...'}
                 value={textContent}
                 onChange={(e) => setTextContent(e.target.value)}
-                rows={12}
+                rows={examType === 'lab-report' ? 6 : 12}
                 className="text-sm font-mono resize-none"
               />
               {examType === 'sts-score' ? (
@@ -261,6 +262,10 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
+              ) : examType === 'lab-report' ? (
+                <p className="text-sm text-gray-500">
+                  請標註重要的異常數據（例如：eGFR 偏低、肌酸酐升高等），這些會在最終申請文件中特別標示
+                </p>
               ) : (
                 <p className="text-sm text-gray-500">
                   請從醫院系統複製報告全文，直接貼上即可
