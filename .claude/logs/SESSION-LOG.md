@@ -325,6 +325,143 @@ tavi-app/
 
 ---
 
+## Session: 2025-12-14 圖片裁切功能與完整檢查類型支援
+
+### 變更摘要
+- ✅ 安裝 react-easy-crop 套件實現圖片裁切功能
+- ✅ 建立 **ImageCropper** 組件
+  - 支援自由裁切（無固定比例限制）
+  - 提供拖動調整位置功能
+  - 提供縮放控制（1x-3x）
+  - 全螢幕裁切介面，黑色半透明背景
+  - 確認/取消按鈕
+- ✅ 建立 **ExaminationInput** 統一組件取代舊的 ImageUploader
+  - 支援 13 種檢查類型（心臟超音波、心導管、EKG、CXR 等）
+  - 動態配置每種檢查類型的輸入需求（文字框、圖片、最少圖片數）
+  - 整合檔案上傳與螢幕截圖功能
+  - 上傳與截圖後自動進入裁切模式
+  - 拖放上傳支援
+- ✅ 更新 **app/page.tsx** 使用新的 ExaminationInput 組件
+  - 移除舊的 ImageUploader 組件
+  - 更新檢查列表顯示支援所有 13 種檢查類型
+- ✅ 更新 Shadcn/ui slider 組件（用於縮放控制）
+- ✅ Git commit 並推送到 GitHub
+
+### 決策記錄
+
+#### 1. 採用 react-easy-crop 而非原生裁切
+- **決定**: 使用 react-easy-crop 套件實現裁切功能
+- **原因**:
+  - 提供完整的裁切 UI 與互動體驗
+  - 支援觸控與滑鼠操作
+  - 內建縮放、拖動功能
+  - 比自行開發更穩定可靠
+  - 使用者體驗更好
+
+#### 2. 每次上傳一張圖片並裁切
+- **決定**: 改為每次處理一張圖片，而非批次處理多張
+- **原因**:
+  - 批次處理時，需要複雜的等待機制
+  - 使用者體驗更清晰：上傳 → 裁切 → 確認 → 再上傳下一張
+  - 避免狀態管理複雜度
+  - 簡化程式碼，減少 bug 風險
+
+#### 3. 裁切介面使用全螢幕覆蓋
+- **決定**: 裁切時顯示全螢幕黑色半透明覆蓋層
+- **原因**:
+  - 提供專注的裁切環境
+  - 避免與背景內容產生視覺干擾
+  - 符合一般圖片編輯軟體的使用習慣
+  - 讓使用者清楚知道目前在裁切模式
+
+#### 4. 支援 13 種檢查類型動態配置
+- **決定**: 使用 EXAMINATION_INPUT_CONFIG 物件配置每種檢查類型的輸入需求
+- **原因**:
+  - 避免重複程式碼
+  - 新增檢查類型只需修改配置，不需改動組件邏輯
+  - 清楚定義每種檢查的輸入需求（文字、圖片、最少數量）
+  - 易於維護與擴充
+
+### 技術細節
+
+#### ImageCropper 組件特性
+```typescript
+// 主要功能
+- Cropper 組件來自 react-easy-crop
+- 縮放範圍：1x 到 3x（使用 Shadcn slider）
+- 無固定裁切比例（aspect={undefined}）
+- 提供即時縮放百分比顯示
+- Canvas API 處理裁切後的圖片輸出（PNG 格式）
+```
+
+#### ExaminationInput 組件結構
+```typescript
+// 13 種檢查類型配置範例
+'echocardiography': {
+  hasText: true,      // 需要文字輸入
+  hasImages: true,    // 需要圖片上傳
+  minImages: 2,       // 至少 2 張圖片
+  placeholder: '請貼上心臟超音波報告全文...',
+},
+'lab-report': {
+  hasText: false,     // 不需要文字輸入
+  hasImages: true,    // 只需要圖片
+  minImages: 1,       // 至少 1 張圖片
+}
+```
+
+#### 裁切流程
+1. 使用者點擊上傳或截圖
+2. 取得圖片資料（File 或 Screenshot）
+3. 設定 `currentCropImage` 觸發裁切介面顯示
+4. 使用者調整裁切範圍與縮放
+5. 點擊確認：Canvas API 產生裁切後的 base64 圖片
+6. 圖片加入 `images` 陣列
+7. `currentCropImage` 設為 null，返回主介面
+8. 可重複上傳下一張圖片
+
+### 待辦事項
+- [x] 安裝 react-easy-crop 套件
+- [x] 建立 ImageCropper 組件
+- [x] 整合裁切功能到 ExaminationInput
+- [x] 測試裁切功能
+- [x] 提交變更到 Git
+- [ ] **Phase 1 剩餘工作**：
+  - [ ] 測試所有 13 種檢查類型的輸入
+  - [ ] 實作 STS Score 計算器（如可行）
+  - [ ] Phase 1 完整測試
+- [ ] **下一步：Phase 2 AI 功能開發**
+  - [ ] 建立 AI API 端點
+  - [ ] 整合 Claude Vision API
+  - [ ] 實作心臟超音波數據提取
+  - [ ] 實作心導管數據提取
+
+### 下次啟動重點
+1. **測試檢查輸入功能**: 確認 13 種檢查類型都能正常運作
+2. **討論 STS Score**: 詢問用戶是否需要實作自動計算，或只提供圖片上傳
+3. **準備 Phase 2**: 討論 AI 數據提取的優先順序與測試資料
+
+### 專案狀態
+- **Phase 0**: ✅ 完成
+- **Phase 1**: 🚧 進行中（約 90% 完成）
+  - ✅ 病患基本資料表單
+  - ✅ 病史選擇系統
+  - ✅ 症狀選擇系統
+  - ✅ 就醫歷程表單
+  - ✅ 檢查報告輸入系統（13 種類型）
+  - ✅ 圖片裁切功能
+  - ⏳ 整體測試待執行
+- **Phase 2-7**: ⏳ 待執行
+- **開發伺服器**: ✅ 正常運作（http://localhost:3000）
+
+### Git 記錄
+- **Commit**: 74f97aa - feat: 實作圖片裁切功能與完整檢查類型支援
+- **推送**: https://github.com/tnfsp/TAVI.git
+- **變更檔案**: 7 files changed, 761 insertions(+), 37 deletions(-)
+- **新增組件**: ImageCropper.tsx, ExaminationInput.tsx, slider.tsx
+
+---
+
 <!-- 新的 session 記錄請加在這裡，格式如下：
 
 ## Session: YYYY-MM-DD HH:MM

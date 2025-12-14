@@ -165,9 +165,10 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
     minImages: 1,
   },
   'sts-score': {
-    hasText: false,
+    hasText: true,
     hasImages: true,
     minImages: 1,
+    placeholder: '請輸入 STS Score 百分比（例如：5.2）',
   },
   'surgeon-assessment': {
     hasText: false,
