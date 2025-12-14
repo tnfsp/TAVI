@@ -1,0 +1,3 @@
+{
+  "/api/ai/generate-surgeon-assessment/route": "app/api/ai/generate-surgeon-assessment/route.js"
+}
