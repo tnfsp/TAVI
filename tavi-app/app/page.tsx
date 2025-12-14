@@ -25,6 +25,7 @@ export default function Home() {
     updateSymptomOnset,
     updateClinicalCourse,
     addExamination,
+    removeExamination,
     updateRiskAssessment,
   } = useCaseStore()
 
@@ -64,6 +65,12 @@ export default function Home() {
   const handleRiskAssessmentSubmit = (data: RiskAssessment) => {
     updateRiskAssessment(data)
     alert('風險評估已儲存')
+  }
+
+  const handleDeleteExamination = (id: string, examType: string) => {
+    if (confirm(`確定要刪除「${examType}」檢查嗎？`)) {
+      removeExamination(id)
+    }
   }
 
   if (!currentCase) {
@@ -167,7 +174,7 @@ export default function Home() {
                 <h3 className="text-base font-semibold mb-4">已輸入的檢查 ({currentCase.examinations.length})</h3>
                 <div className="space-y-3">
                   {currentCase.examinations.map((exam) => (
-                    <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded group hover:bg-gray-100 transition-colors">
                       <div>
                         <span className="font-medium">
                           {EXAMINATION_LABELS[exam.type]}
@@ -176,7 +183,17 @@ export default function Home() {
                           ({exam.date})
                         </span>
                       </div>
-                      <span className="text-sm text-green-600">✓ 已儲存</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-green-600">✓ 已儲存</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteExamination(exam.id, EXAMINATION_LABELS[exam.type])}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          刪除
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
