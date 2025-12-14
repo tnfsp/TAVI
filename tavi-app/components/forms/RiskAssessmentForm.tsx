@@ -38,7 +38,7 @@ const riskAssessmentSchema = z.object({
   surgeon1: z.string().min(1, '請輸入第一位外科醫師姓名'),
   surgeon2: z.string().min(1, '請輸入第二位外科醫師姓名'),
   nyhaClass: z.enum(['I', 'II', 'III', 'IV'], {
-    required_error: '請選擇 NYHA 心功能分級',
+    message: '請選擇 NYHA 心功能分級',
   }),
   urgencyReason: z.string().min(1, '請說明手術適應症與緊急性'),
 })

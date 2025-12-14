@@ -15,7 +15,7 @@ const patientSchema = z.object({
   name: z.string().min(2, '姓名至少需要 2 個字').max(10, '姓名最多 10 個字'),
   chartNumber: z.string().min(1, '請輸入病歷號'),
   gender: z.enum(['male', 'female'], { message: '請選擇性別' }),
-  age: z.coerce.number().min(0, '年齡不可為負數').max(150, '請輸入有效年齡'),
+  age: z.number().min(0, '年齡不可為負數').max(150, '請輸入有效年齡'),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '請輸入正確的日期格式 (YYYY-MM-DD)'),
   nationalId: z.string().min(10, '身分證號格式錯誤').max(10, '身分證號格式錯誤'),
 })
