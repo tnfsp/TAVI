@@ -959,3 +959,133 @@ TAVI 事前審查（副標題，置中）
 
 ---
 
+
+## Session: 2025-12-14 Vercel 部署與新增檢查類型
+
+### 變更摘要
+- ✅ **成功部署到 Vercel**
+  - 修正專案結構：將 tavi-app 內容移至根目錄
+  - 修正所有 TypeScript 編譯錯誤
+  - 部署 URL: https://tavi-seven.vercel.app/
+
+- ✅ **新增三個檢查類型**
+  - 心肌灌注掃描（Myocardial Perfusion Scan）- 放在 Heart CT 後面
+  - List of Diagnosis - 放在 STS Score 前面
+  - Assessment and Plan - 放在 STS Score 前面
+
+- ✅ **修正年齡欄位驗證錯誤**
+  - 使用 z.preprocess 轉換 string → number
+  - 解決 HTML input type="number" 返回 string 的問題
+
+- ✅ **修正 AI Prompt 問題**
+  - 修正檢查報告欄位名稱：exam.text → exam.textContent
+  - 更新檢查類型對應表，加入新增的三個檢查類型
+  - 修正檢查類型名稱不一致問題
+
+### 決策記錄
+
+#### 1. Vercel 部署策略：直接移動專案到根目錄
+- **問題**：Root Directory 設定在 Vercel 上一直無法正常運作，導致 404 錯誤
+- **決定**：將 tavi-app 目錄內容直接移至專案根目錄
+- **原因**:
+  - 簡化部署配置，不需要設定 Root Directory
+  - Vercel 可以直接找到 package.json 和 next.config.ts
+  - 避免 vercel.json 配置衝突問題
+
+#### 2. AI 生成摘要只傳遞文字內容，不包含圖片
+- **決定**：維持目前只傳遞檢查報告文字內容給 AI
+- **原因**:
+  - 成本考量：圖片分析會消耗大量 tokens
+  - 效率考量：純文字生成速度更快
+  - 使用者已手動複製貼上報告內容，圖片主要用於存檔參考
+  - 護理師會手動確認數據正確性
+
+#### 3. 新增檢查類型的輸入方式配置
+- **心肌灌注掃描**：文字 + 圖片（彈性支援圖文並茂的報告）
+- **List of Diagnosis**：純文字（診斷列表通常是文字格式）
+- **Assessment and Plan**：純文字（評估與計畫內容）
+
+### 技術細節
+
+#### Vercel 部署問題解決過程
+1. 嘗試使用 Dashboard 設定 Root Directory → 失敗（404）
+2. 建立 vercel.json 指定目錄 → 失敗（找不到目錄）
+3. 移除 vercel.json，只依賴 Dashboard 設定 → 仍然失敗
+4. **最終解決**：將專案結構扁平化，移到根目錄 → 成功 ✅
+
+#### Git 操作記錄
+```bash
+# 重新結構化專案
+git commit -m "refactor: 將 Next.js 專案移至根目錄"  # de80a45
+git commit -m "fix: 修正 DOCX API Buffer 類型錯誤"    # 8dbcf6a
+git commit -m "fix: 修正 Zod enum 驗證語法錯誤"       # f8537ee
+git commit -m "fix: 修正所有 TypeScript 編譯錯誤"     # ff9229b
+git commit -m "feat: 新增檢查類型與修正驗證錯誤"      # acc6c69
+```
+
+#### 檢查類型完整列表（按順序）
+1. 心臟超音波檢查（文字 + 圖片）
+2. 心導管檢查（純文字）
+3. 心電圖 EKG（文字 + 圖片）
+4. 胸部 X 光 CXR（文字 + 圖片）
+5. 肺功能檢查（純文字）
+6. 四肢血流探測 ABI（純文字）
+7. Heart CT（純文字）
+8. **心肌灌注掃描**（文字 + 圖片）⬅️ 新增
+9. 生理測量（純文字）
+10. 檢驗報告（純圖片）
+11. 就醫紀錄（純圖片）
+12. 就醫用藥（純圖片）
+13. **List of Diagnosis**（純文字）⬅️ 新增
+14. **Assessment and Plan**（純文字）⬅️ 新增
+15. STS Score（文字 + 圖片）
+
+### 待辦事項
+- [x] 部署到 Vercel
+- [x] 新增心肌灌注掃描檢查類型
+- [x] 新增 List of Diagnosis 和 Assessment and Plan
+- [x] 修正年齡欄位驗證錯誤
+- [x] 修正 AI Prompt 檢查報告欄位錯誤
+- [ ] **測試部署後的新功能**
+  - [ ] 測試新增的 3 個檢查類型在下拉選單中正常顯示
+  - [ ] 測試年齡欄位可以正常輸入數字
+  - [ ] 測試 AI 生成摘要功能
+- [ ] **更新文件記錄**（重要！）
+  - [ ] 找到並記錄完整申請文件範本位置
+  - [ ] 在 CLAUDE.md 或專門文件中記錄完整申請文件的 13 個區塊結構
+  - [ ] 為 Phase 4 實作做準備
+- [ ] **Phase 3：上傳已簽名的醫師評估文件**
+- [ ] **Phase 4：生成完整事前審查申請文件**（需要範本參考）
+
+### 使用者提醒事項
+使用者提醒了兩個重要的事情：
+1. **要記得同步更新 CLAUDE.md 和 SESSION-LOG.md** - 保持文件記錄完整
+2. **完整申請文件的範本之前已提供** - 但我沒有妥善記錄，需要重新確認範本位置
+
+### 下次啟動重點
+1. **確認完整申請文件範本位置**
+   - 檢查 TAVI VPN case 資料夾中的「術前檢查查核表.doc」
+   - 或請使用者重新指定範本文件位置
+2. **記錄完整申請文件結構**（13 個區塊）到專門的文件中
+3. **測試 Vercel 部署的新功能**
+4. **規劃 Phase 3 和 Phase 4 實作**
+
+### 專案狀態
+- **Phase 0**: ✅ 完成
+- **Phase 1**: ✅ 完成（100%）
+- **Phase 2**: ✅ 完成（100%）並成功部署
+- **Phase 3**: ⏳ 待開始（上傳已簽名文件）
+- **Phase 4**: ⏳ 待開始（生成完整申請文件 - **需要範本參考**）
+- **Phase 5-7**: ⏳ 待執行
+- **部署狀態**: ✅ 成功（https://tavi-seven.vercel.app/）
+
+### Git 記錄
+- **Commit**: `acc6c69` - feat: 新增檢查類型與修正驗證錯誤
+- **推送**: https://github.com/tnfsp/TAVI.git
+- **變更檔案**:
+  - `types/index.ts` (新增 3 個檢查類型)
+  - `components/forms/PatientInfoForm.tsx` (修正年齡驗證)
+  - `lib/ai/prompts/surgeon-assessment.ts` (修正欄位名稱，更新類型對應)
+
+---
+
