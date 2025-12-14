@@ -13,7 +13,7 @@ import {
   EXAMINATION_INPUT_CONFIG,
   type Examination,
 } from '@/types'
-import { Upload, Monitor, X, Image as ImageIcon, FileText } from 'lucide-react'
+import { Upload, Monitor, X, Image as ImageIcon, FileText, ExternalLink } from 'lucide-react'
 import { ImageCropper } from './ImageCropper'
 
 interface ExaminationInputProps {
@@ -247,9 +247,25 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
                 rows={12}
                 className="text-sm font-mono resize-none"
               />
-              <p className="text-sm text-gray-500">
-                請從醫院系統複製報告全文，直接貼上即可
-              </p>
+              {examType === 'sts-score' ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span>請輸入計算好的 STS Score 百分比</span>
+                  <span>•</span>
+                  <a
+                    href="https://riskcalc.sts.org/stswebriskcalc/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    開啟 STS Calculator
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  請從醫院系統複製報告全文，直接貼上即可
+                </p>
+              )}
             </div>
           )}
 
