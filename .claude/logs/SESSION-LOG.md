@@ -29,6 +29,177 @@
 
 ---
 
+## Session: 2025-12-14 需求討論與文件撰寫
+
+### 變更摘要
+- ✅ 與用戶深入討論 TAVI 健保申請專案需求
+- ✅ 分析現有健保申請文件結構（閱讀 2 份真實案例）
+- ✅ 完成 **PRD.md** (產品需求文件)
+  - 定義專案目標：協助護理師快速完成申請文件（從 170 分鐘縮短至 32 分鐘）
+  - 設計完整功能需求：11 個核心功能
+  - 列出常見病史與症狀選項
+  - 設計資料結構與使用流程
+- ✅ 完成 **TECHSTACK.md** (技術棧說明)
+  - 確定使用 Next.js 15 + Claude API + Vercel 部署
+  - 選擇 Shadcn/ui、Tailwind CSS、React Hook Form 等技術
+  - 設計專案結構和 API 端點
+- ✅ 更新 **CLAUDE.md** 專案名稱為「TAVI 健保申請輔助系統」
+
+### 決策記錄
+
+#### 1. 採用「輔助式生成」方案（方案 B）
+- **決定**: 不採用全自動生成，而是採用「結構化輸入 + AI 輔助 + 人工確認」
+- **原因**:
+  - 醫療文件需要高準確度，完全自動化風險太高
+  - 護理師輸入病史/症狀選項，AI 負責數據提取和格式化
+  - 保留人工編輯功能，確保內容正確性
+
+#### 2. 檢查日期處理：混合方案
+- **決定**: AI 嘗試識別日期並預填，護理師確認/修改
+- **原因**:
+  - 日期在醫療文件中極度重要，不能有錯
+  - 報告格式不統一，AI 識別準確度約 80-90%
+  - 護理師快速確認比重新輸入省時
+
+#### 3. 技術棧選擇
+- **前端**: Next.js 15 (App Router) + TypeScript + Tailwind CSS + Shadcn/ui
+- **後端**: Next.js API Routes (Serverless)
+- **AI**: Claude 3.5 Sonnet (Vision API)
+- **資料儲存**: LocalStorage / IndexedDB (無需後端資料庫)
+- **部署**: Vercel (用戶指定)
+- **原因**:
+  - 考量使用者年齡（45-60 歲），界面需簡單易用
+  - Vercel 部署零配置，開發快速
+  - LocalStorage 保護隱私，無需後端資料庫
+  - Claude API 的 Vision 能力適合醫學影像識別
+
+#### 4. 不需要登入功能
+- **決定**: 暫不實作登入功能
+- **原因**: 單一護理師使用，資料存在瀏覽器本地即可
+
+#### 5. 範本管理延後考慮
+- **決定**: MVP 階段先不實作範本管理
+- **原因**: 先驗證核心功能可行性，範本管理可後續擴充
+
+### 待辦事項
+- [x] 更新 CLAUDE.md 中的 `[PROJECT_NAME]` → TAVI 健保申請輔助系統
+- [x] 完成 PRD.md
+- [x] 完成 TECHSTACK.md
+- [ ] 執行 `/pm` 建立 IMPLEMENTATION-PLAN.md（實作計畫）
+- [ ] PM 建立開發用 Subagent：
+  - `/frontend-dev` - 前端開發
+  - `/backend-dev` - 後端開發
+  - `/ai-engineer` - AI Prompt 優化
+- [ ] 開始開發 MVP 功能
+
+### 下次啟動重點
+1. 執行 `/pm` 讓專案經理規劃實作計畫
+2. 確認開發環境設定（Node.js, pnpm, Claude API Key）
+3. 建立 Next.js 專案結構
+4. 開始實作第一個功能：病患基本資料輸入表單
+
+---
+
+## Session: 2025-12-14 PM 規劃與 Subagent 建立
+
+### 變更摘要
+- ✅ PM 接手專案規劃
+- ✅ 完成 **IMPLEMENTATION-PLAN.md** (實作計畫)
+  - 規劃 7 個開發階段 (Phase 0-7)
+  - 預估開發時間 4-6 週
+  - 定義 7 個里程碑
+  - 列出風險與應對策略
+- ✅ 建立 3 個開發用 Subagent：
+  - `/frontend-dev` - 前端開發專家
+  - `/backend-dev` - 後端 API 與整合專家
+  - `/ai-engineer` - AI Prompt 優化專家
+- 📝 每個 Subagent 都有詳細的職責說明、開發規範、檢查清單
+
+### 決策記錄
+
+#### 1. 採用 7 階段開發策略
+- **Phase 0**: 專案初始化 (2-3 天)
+- **Phase 1**: 基礎功能 - 資料輸入 (1 週)
+- **Phase 2**: AI 功能 - 圖片上傳與數據提取 (1.5 週)
+- **Phase 3**: 文件生成功能 (1 週)
+- **Phase 4**: Word 匯出功能 (3 天)
+- **Phase 5**: 歷史案例管理 (3 天)
+- **Phase 6**: UI/UX 優化 (3 天)
+- **Phase 7**: 測試與部署 (3-4 天)
+- **原因**: 逐步推進，每個階段都有明確的完成標準，便於測試與迭代
+
+#### 2. Subagent 職責分工
+- **Frontend Dev**: 負責 Phase 1, 3, 5, 6 (所有 UI/表單/編輯器)
+- **Backend Dev**: 負責 Phase 0, 2, 4 (專案初始化、API、整合)
+- **AI Engineer**: 負責 Phase 2 的 Prompt 設計與 Phase 7 的準確度優化
+- **原因**: 明確分工，避免重複，各司其職
+
+#### 3. MVP 優先策略
+- 先實現核心流程（資料輸入 → AI 提取 → 文件生成 → 匯出）
+- UI/UX 優化延後到 Phase 6
+- **原因**: 快速驗證核心價值，盡早發現問題
+
+#### 4. 里程碑設定
+- **M1** (Day 3): 專案初始化完成
+- **M2** (Week 1): 資料輸入功能完成
+- **M3** (Week 2.5): AI 功能完成
+- **M4** (Week 3.5): 文件生成完成
+- **M5** (Week 4): 匯出功能完成
+- **M6** (Week 4.5): MVP 完成
+- **M7** (Week 6): 正式上線
+- **原因**: 清楚的進度指標，便於追蹤與調整
+
+### Subagent 建立詳情
+
+#### `/frontend-dev` (前端開發)
+- **職責**: React 組件、表單、狀態管理、UI/UX
+- **技術**: Next.js 15, React Hook Form, Zod, Tailwind, Shadcn/ui, Tiptap
+- **規範**: 詳細的組件結構、表單驗證、無障礙性要求
+- **檔案**: `.claude/commands/frontend-dev.md`
+
+#### `/backend-dev` (後端開發)
+- **職責**: API Routes, Claude API 整合, Word 文件生成
+- **技術**: Next.js API Routes, @anthropic-ai/sdk, docx.js
+- **規範**: API 結構、錯誤處理、Claude API 封裝
+- **特色**: 包含詳細的 Phase 0 初始化步驟指南
+- **檔案**: `.claude/commands/backend-dev.md`
+
+#### `/ai-engineer` (AI 工程師)
+- **職責**: Prompt 設計、準確度優化、參數調校
+- **技術**: Claude 3.5 Sonnet, Vision API, Prompt Engineering
+- **規範**: Prompt 設計原則、測試流程、優化方法
+- **特色**: 提供完整的 Prompt 模板（心臟超音波、心導管、日期識別）
+- **檔案**: `.claude/commands/ai-engineer.md`
+
+### 待辦事項
+- [x] 執行 `/pm` 建立 IMPLEMENTATION-PLAN.md
+- [x] 建立 `/frontend-dev` subagent
+- [x] 建立 `/backend-dev` subagent
+- [x] 建立 `/ai-engineer` subagent
+- [ ] **下一步：確認開發環境**
+  - [ ] 用戶是否已安裝 Node.js 20.x？
+  - [ ] 用戶是否已安裝 pnpm？
+  - [ ] 用戶是否已取得 Claude API Key？
+- [ ] **開始 Phase 0：專案初始化**
+  - 建立 Next.js 專案
+  - 安裝依賴
+  - 建立目錄結構
+  - 設定環境變數
+
+### 下次啟動重點
+1. **確認開發環境**: 詢問用戶是否已準備好開發環境
+2. **啟動 Backend Dev**: 執行 `/backend-dev` 開始 Phase 0
+3. **建立 Next.js 專案**: 按照 IMPLEMENTATION-PLAN 的步驟初始化
+4. **設定 Claude API Key**: 確保可以呼叫 Claude API
+
+### 專案狀態
+- **文件完成度**: PRD ✅ | TECHSTACK ✅ | IMPLEMENTATION-PLAN ✅
+- **Subagent 就緒**: `/concept` ✅ | `/pm` ✅ | `/frontend-dev` ✅ | `/backend-dev` ✅ | `/ai-engineer` ✅
+- **開發進度**: Phase 0 未開始
+- **預估完成時間**: 4-6 週
+
+---
+
 <!-- 新的 session 記錄請加在這裡，格式如下：
 
 ## Session: YYYY-MM-DD HH:MM

@@ -1,8 +1,8 @@
-# Project: [PROJECT_NAME]
-
-> 這是專案模板框架。開始新專案時，請將 `[PROJECT_NAME]` 替換為實際專案名稱。
+# Project: TAVI 健保申請輔助系統
 
 ## 專案概述
+
+**TAVI 健保申請輔助系統**是一個協助專科護理師快速完成 TAVI（經導管主動脈瓣膜置換術）健保事前審查申請文件的 Web 應用。透過 Claude AI 自動讀取檢查報告截圖並生成標準化申請文件，大幅減少資料整理時間（從 2-4 小時縮短至 30 分鐘）。
 
 此專案使用 Claude Code 的 Subagent 架構進行開發。主要透過兩個核心 subagent 協作：
 - **Concept** (`/concept`): 專案概念設計師，負責需求分析與架構設計

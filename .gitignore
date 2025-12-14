@@ -29,3 +29,6 @@ out/
 # Temporary
 tmp/
 temp/
+
+# User data (contains sensitive medical information)
+TAVI VPN case*/
