@@ -805,3 +805,157 @@ TAVI 事前審查（副標題，置中）
 - [x] 已完成的事（保留追蹤）
 
 -->
+
+## Session: 2025-12-14 使用者體驗優化
+
+### 變更摘要
+- ✅ **新增病史自訂輸入功能**
+  - 在病史選擇區新增「其他病史」文字輸入框
+  - 更新 `CaseData` 介面加入 `customHistory` 和 `customSymptoms` 欄位
+  - 更新 Zustand store 加入 `updateCustomHistory` 和 `updateCustomSymptoms` 方法
+  - 修改 `MedicalHistorySelector` 組件支援自訂病史輸入
+  - 更新 `page.tsx` 處理新的資料結構
+  - 視覺回饋：顯示「已選擇 X 項病史 + 其他病史」提示
+
+- ✅ **移除檢查圖片上傳數量限制**
+  - 移除 `types/index.ts` 中所有檢查類型的 `minImages` 限制
+  - 原本的驗證邏輯會自動跳過（因條件判斷 `minImages` 為 undefined）
+  - 使用者可自由決定是否上傳圖片及上傳數量
+  - 簡化使用流程，提升靈活性
+
+- ✅ **新增已輸入檢查的刪除功能**
+  - 在檢查列表中加入刪除按鈕（滑鼠懸停時顯示）
+  - 使用 `removeExamination` 從 store 中移除檢查資料
+  - 新增確認對話框防止誤刪
+  - 優化檢查列表 UI，加入 hover 效果和平滑過渡動畫
+  - 刪除按鈕使用紅色主題，視覺上清楚區分
+
+- ✅ Git commits & push
+  - Commit 1: `da73a6b` - feat: 新增病史自訂輸入與移除檢查圖片數量限制
+  - Commit 2: `af72740` - feat: 新增已輸入檢查的刪除功能
+  - 推送至 GitHub: https://github.com/tnfsp/TAVI.git
+
+### 決策記錄
+
+#### 1. 新增自訂病史輸入而非動態新增選項
+- **決定**: 使用單一 Textarea 讓使用者輸入自訂病史，而非提供「新增選項」按鈕
+- **原因**:
+  - 簡單直覺，符合表單填寫習慣
+  - 避免 UI 過度複雜（新增/刪除按鈕會增加認知負擔）
+  - 自訂病史通常是少數例外情況，不需要複雜的管理介面
+  - 資料結構簡單，儲存為單一字串即可
+
+#### 2. 為未來預留 customSymptoms 欄位
+- **決定**: 同時在 types 和 store 中加入 `customSymptoms` 欄位
+- **原因**:
+  - 病史和症狀的需求模式相同
+  - 預留擴充性，未來可快速實作症狀自訂輸入
+  - 資料結構一致性，易於維護
+
+#### 3. 完全移除 minImages 限制而非設為 0
+- **決定**: 直接刪除 `minImages` 屬性，而非設為 `0` 或 `undefined`
+- **原因**:
+  - TypeScript 介面中 `minImages` 已定義為可選 (`minImages?: number`)
+  - 刪除屬性比設為特殊值更清晰表達「無限制」的語意
+  - 現有驗證邏輯已有 `config.minImages &&` 條件判斷，會自動跳過
+  - 減少不必要的屬性，保持配置簡潔
+
+#### 4. 刪除按鈕使用 hover 顯示而非永久顯示
+- **決定**: 刪除按鈕預設隱藏，滑鼠懸停時才顯示
+- **原因**:
+  - 避免介面過於擁擠，保持視覺整潔
+  - 減少誤觸風險（不會不小心點到刪除）
+  - 符合現代 UI 設計慣例（如 Gmail、Notion）
+  - 使用 `group` 和 `group-hover` Tailwind 類別，實作簡單且效能好
+
+#### 5. 刪除前顯示確認對話框
+- **決定**: 使用原生 `confirm()` 對話框，而非自訂 modal
+- **原因**:
+  - 刪除操作有破壞性，必須二次確認
+  - 原生對話框簡單可靠，無需額外狀態管理
+  - 對話框內容包含檢查類型名稱（如「心臟超音波檢查」），讓使用者清楚知道刪除內容
+  - MVP 階段優先功能完整性，UI 美化可後續優化
+
+### 技術細節
+
+#### 自訂病史資料流
+```
+使用者輸入 Textarea
+  → MedicalHistorySelector 狀態更新
+  → onSubmit({ selected, customHistory })
+  → handleMedicalHistorySubmit 呼叫
+  → updateCustomHistory(data.customHistory)
+  → Zustand store 更新
+  → LocalStorage 持久化
+```
+
+#### 檢查刪除流程
+```
+滑鼠懸停檢查項目
+  → 刪除按鈕淡入顯示 (opacity-0 → opacity-100)
+  → 點擊刪除按鈕
+  → confirm() 對話框彈出
+  → 使用者確認
+  → removeExamination(id) 呼叫
+  → Zustand store 移除該項目
+  → UI 自動更新（React re-render）
+  → LocalStorage 自動同步
+```
+
+#### Git Diff 統計
+- Commit 1: 4 files changed, 66 insertions(+), 13 deletions(-)
+- Commit 2: 1 file changed, 19 insertions(+), 2 deletions(-)
+- 總計: 5 files changed, 85 insertions(+), 15 deletions(-)
+
+### 待辦事項
+- [x] 新增病史自訂輸入功能
+- [x] 移除檢查圖片數量限制
+- [x] 新增檢查刪除功能
+- [ ] **測試新功能**（下次重點）
+  - [ ] 測試病史自訂輸入：輸入、儲存、顯示
+  - [ ] 測試檢查上傳：不同類型、0 張圖片、多張圖片
+  - [ ] 測試檢查刪除：確認對話框、資料移除、UI 更新
+- [ ] **考慮新增症狀自訂輸入**
+  - [ ] 討論是否需要（目前已預留資料結構）
+  - [ ] 若需要，套用相同模式至 SymptomSelector 元件
+- [ ] **Phase 2 完整測試**
+  - [ ] 測試 AI 摘要生成功能
+  - [ ] 測試 Word 文件下載
+  - [ ] 驗證文件格式是否符合健保局要求
+- [ ] **Phase 3：上傳已簽名的醫師評估文件**
+- [ ] **Phase 4：生成完整事前審查申請文件**
+
+### 使用者回饋整合
+本次 session 主要根據使用者的三個需求進行優化：
+1. **「病史那邊新增一個其他，讓我們可以新增」** → ✅ 完成自訂病史輸入
+2. **「檢查不用限定一定要幾張」** → ✅ 移除圖片數量限制
+3. **「已經輸入的檢查要可以刪除」** → ✅ 新增刪除功能
+
+這些優化都是基於實際使用場景，提升系統靈活性與使用者體驗。
+
+### 下次啟動重點
+1. **測試本次新增的三個功能**，確保運作正常
+2. **詢問使用者**是否需要在症狀區塊也加入自訂輸入（已預留資料結構）
+3. **繼續 Phase 2 測試**：使用真實資料測試 AI 生成摘要與 Word 文件下載
+4. **規劃 Phase 3**：討論簽名文件上傳的需求與格式
+
+### 專案狀態
+- **Phase 0**: ✅ 完成
+- **Phase 1**: ✅ 完成（100%）+ 本次 UX 優化
+- **Phase 2**: ✅ 開發完成（100%）
+  - ⏳ 功能測試待執行
+- **Phase 3-7**: ⏳ 待執行
+- **開發伺服器**: ✅ 正常運作（http://localhost:3000）
+
+### Git 記錄
+- **Commit 1**: `da73a6b` - feat: 新增病史自訂輸入與移除檢查圖片數量限制
+- **Commit 2**: `af72740` - feat: 新增已輸入檢查的刪除功能
+- **推送**: https://github.com/tnfsp/TAVI.git (267b7c9..af72740)
+- **變更檔案**:
+  - `tavi-app/types/index.ts` (新增 customHistory/customSymptoms, 移除 minImages)
+  - `tavi-app/store/useCaseStore.ts` (新增 update 方法)
+  - `tavi-app/components/forms/MedicalHistorySelector.tsx` (新增 Textarea)
+  - `tavi-app/app/page.tsx` (處理新資料結構 + 刪除功能)
+
+---
+
