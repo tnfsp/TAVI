@@ -78,7 +78,6 @@ export type ExaminationType =
   | 'medical-record'          // 就醫紀錄
   | 'medication-record'       // 就醫用藥
   | 'sts-score'               // STS Score
-  | 'surgeon-assessment'      // 外科醫師判定
 
 // 檢查類型標籤
 export const EXAMINATION_LABELS: Record<ExaminationType, string> = {
@@ -94,7 +93,6 @@ export const EXAMINATION_LABELS: Record<ExaminationType, string> = {
   'medical-record': '就醫紀錄',
   'medication-record': '就醫用藥',
   'sts-score': 'STS Score',
-  'surgeon-assessment': '外科醫師判定',
 }
 
 // 檢查輸入方式配置
@@ -169,11 +167,6 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
     hasImages: true,
     minImages: 1,
     placeholder: '請輸入 STS Score 百分比（例如：5.2）',
-  },
-  'surgeon-assessment': {
-    hasText: false,
-    hasImages: true,
-    minImages: 1,
   },
 }
 
