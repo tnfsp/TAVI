@@ -10,7 +10,6 @@ import {
   AlignmentType,
   HeadingLevel,
   ImageRun,
-  convertInchesToTwip,
   LineRuleType,
 } from 'docx'
 import type { CaseData, Examination } from '@/types'
@@ -167,14 +166,18 @@ function createImageParagraph(base64Data: string): Paragraph {
     // 計算適合的顯示尺寸
     const { width, height } = calculateImageSize(imgWidth, imgHeight)
 
+    // 手動計算 twips (1 inch = 1440 twips)
+    const widthInTwips = Math.round(width * 1440)
+    const heightInTwips = Math.round(height * 1440)
+
     return new Paragraph({
       children: [
         new ImageRun({
           type: format,
           data: Uint8Array.from(imageBuffer),
           transformation: {
-            width: convertInchesToTwip(width),
-            height: convertInchesToTwip(height),
+            width: widthInTwips,
+            height: heightInTwips,
           },
         } as any),
       ],
