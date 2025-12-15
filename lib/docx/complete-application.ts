@@ -60,32 +60,113 @@ function createDivider(): Paragraph {
 }
 
 /**
- * 建立文字段落
+ * 建立文字段落（支援換行）
  */
 function createTextParagraph(text: string): Paragraph {
-  return new Paragraph({
-    children: [
+  // 將文字按換行符號分割
+  const lines = text.split('\n')
+
+  // 為每一行創建 TextRun，行與行之間加入換行
+  const children: (TextRun)[] = []
+  lines.forEach((line, index) => {
+    children.push(
       new TextRun({
-        text,
+        text: line,
         font: {
           name: '標楷體',
           eastAsia: '標楷體',
         },
         size: 24, // 12pt
-      }),
-    ],
+      })
+    )
+    // 除了最後一行，都加入換行符號
+    if (index < lines.length - 1) {
+      children.push(
+        new TextRun({
+          break: 1,
+        })
+      )
+    }
+  })
+
+  return new Paragraph({
+    children,
     spacing: { line: 360 }, // 1.5 倍行距
     alignment: AlignmentType.JUSTIFIED,
   })
 }
 
 /**
- * 從 Base64 建立圖片段落
+ * 計算圖片適合的尺寸（保持原始比例）
  */
-function createImageParagraph(base64Data: string, width: number = 6): Paragraph {
+function calculateImageSize(imageWidth: number, imageHeight: number): { width: number; height: number } {
+  const maxWidthInches = 5.5 // A4 有效寬度約 6.5 英寸，留點邊距用 5.5
+  const maxHeightInches = 8.5 // 最大高度限制，避免直式圖片過高
+
+  // 計算原始比例
+  const aspectRatio = imageWidth / imageHeight
+
+  let finalWidth = maxWidthInches
+  let finalHeight = finalWidth / aspectRatio
+
+  // 如果高度超過限制，以高度為準重新計算
+  if (finalHeight > maxHeightInches) {
+    finalHeight = maxHeightInches
+    finalWidth = finalHeight * aspectRatio
+  }
+
+  return { width: finalWidth, height: finalHeight }
+}
+
+/**
+ * 從 Buffer 取得圖片尺寸（支援 PNG 和 JPEG）
+ */
+function getImageDimensions(buffer: Buffer): { width: number; height: number } {
+  // PNG 格式檢測 (89 50 4E 47)
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+    // PNG: 寬度在 bytes 16-19, 高度在 bytes 20-23
+    const width = buffer.readUInt32BE(16)
+    const height = buffer.readUInt32BE(20)
+    return { width, height }
+  }
+
+  // JPEG 格式檢測 (FF D8)
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8) {
+    let offset = 2
+    while (offset < buffer.length) {
+      // 尋找 SOF0 marker (FF C0)
+      if (buffer[offset] === 0xFF && (buffer[offset + 1] === 0xC0 || buffer[offset + 1] === 0xC2)) {
+        const height = buffer.readUInt16BE(offset + 5)
+        const width = buffer.readUInt16BE(offset + 7)
+        return { width, height }
+      }
+      // 跳到下一個 marker
+      if (buffer[offset] === 0xFF) {
+        const markerLength = buffer.readUInt16BE(offset + 2)
+        offset += markerLength + 2
+      } else {
+        offset++
+      }
+    }
+  }
+
+  // 如果無法解析，返回預設值（橫式 16:9）
+  return { width: 1920, height: 1080 }
+}
+
+/**
+ * 從 Base64 建立圖片段落（保持原始比例）
+ */
+function createImageParagraph(base64Data: string): Paragraph {
   try {
     const imageBuffer = base64ToBuffer(base64Data)
     const format = detectImageFormat(base64Data)
+
+    // 取得圖片原始尺寸
+    const { width: imgWidth, height: imgHeight } = getImageDimensions(imageBuffer)
+
+    // 計算適合的顯示尺寸
+    const { width, height } = calculateImageSize(imgWidth, imgHeight)
 
     return new Paragraph({
       children: [
@@ -94,16 +175,15 @@ function createImageParagraph(base64Data: string, width: number = 6): Paragraph 
           data: Uint8Array.from(imageBuffer),
           transformation: {
             width: convertInchesToTwip(width),
-            height: convertInchesToTwip(width * 0.75), // 假設 4:3 比例
+            height: convertInchesToTwip(height),
           },
-        } as any), // 暫時使用 any 避免類型錯誤
+        } as any),
       ],
       alignment: AlignmentType.CENTER,
       spacing: { before: 200, after: 200 },
     })
   } catch (error) {
     console.error('圖片插入失敗:', error)
-    // 返回錯誤提示段落
     return new Paragraph({
       text: '[圖片載入失敗]',
       alignment: AlignmentType.CENTER,
@@ -247,8 +327,8 @@ export async function generateCompleteApplication(
   ))
 
   if (signedDocumentBase64) {
-    // 使用已上傳的簽名文件
-    sections.push(createImageParagraph(signedDocumentBase64, 7))
+    // 使用已上傳的簽名文件（自動取得正確尺寸和比例）
+    sections.push(createImageParagraph(signedDocumentBase64))
   } else {
     // 使用預設佔位圖片/文字
     sections.push(new Paragraph({
