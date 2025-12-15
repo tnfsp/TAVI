@@ -790,6 +790,162 @@ TAVI 事前審查（副標題，置中）
 
 ---
 
+## Session: 2025-12-15 PM 規劃 Phase 1.5 UX 優化
+
+### 變更摘要
+- ✅ 與用戶討論並確認 Phase 1.5 UX 優化需求
+- ✅ 規劃三個主要功能：
+  1. 新增 EuroSCORE 檢查類型（在檢查報告輸入區）
+  2. 風險評估表單新增 STS ↔ EuroSCORE 切換功能
+  3. 檢查輸入支援 Ctrl+V 貼上截圖
+- ✅ 更新 IMPLEMENTATION-PLAN v3.1
+- ✅ 建立詳細的實作待辦清單
+
+### 需求確認
+
+#### Feature 1: 新增 EuroSCORE 檢查類型
+- **位置**：步驟 5 - 檢查報告輸入（ExaminationInput）
+- **配置**：與其他檢查類型並列
+  - 支援文字輸入（EuroSCORE 百分比）
+  - 支援圖片上傳/截圖（Calculator 截圖）
+- **實作方式**：
+  - 修改 `types/index.ts` 新增檢查類型定義
+  - ExaminationInput 組件自動支援（無需修改）
+
+#### Feature 2: 風險評估表單新增切換按鈕
+- **位置**：步驟 6 - 手術風險評估與適應症（RiskAssessmentForm）
+- **功能設計**：
+  - 在 STS Score 輸入框上方/旁邊新增切換按鈕
+  - 切換選項：STS Score ↔ EuroSCORE（舊版）
+  - 系統預設：STS Score
+  - 切換行為：保留兩邊資料（可隨時切換查看）
+  - Calculator 連結：
+    - STS: https://riskcalc.sts.org/stswebriskcalc/
+    - EuroSCORE: http://www.euroscore.org/calc.html
+
+#### Feature 3: 檢查輸入貼上截圖功能
+- **位置**：所有檢查類型的圖片上傳區
+- **功能**：
+  - 支援 Ctrl+V 貼上剪貼簿中的圖片
+  - 自動進入裁切模式
+  - UI 顯示「支援 Ctrl+V 貼上截圖」提示
+
+### 決策記錄
+
+#### 1. EuroSCORE 同時作為檢查類型和風險評估選項
+- **決定**：EuroSCORE 在兩個地方都會出現
+  1. 檢查報告輸入（上傳 Calculator 截圖和填寫數值）
+  2. 風險評估表單（與 STS Score 二擇一）
+- **原因**：
+  - 檢查報告區：護理師需要上傳 EuroSCORE 計算結果截圖作為證明
+  - 風險評估區：醫師會選擇使用 STS 或 EuroSCORE 作為風險評估工具
+  - 兩者獨立但相關，可滿足不同的使用場景
+
+#### 2. 使用舊版 EuroSCORE 而非 EuroSCORE II
+- **決定**：實作舊版 EuroSCORE
+- **原因**：用戶明確指定使用舊版
+
+#### 3. 切換時保留資料
+- **決定**：STS 和 EuroSCORE 的資料都保留在 state 中
+- **原因**：
+  - 護理師可能需要比較兩種評估結果
+  - 避免切換時資料遺失
+  - 提供更好的使用者體驗
+
+#### 4. 貼上截圖功能套用到所有檢查類型
+- **決定**：在 ExaminationInput 統一實作，所有檢查類型都支援
+- **原因**：
+  - 提供一致的使用者體驗
+  - 減少實作複雜度
+  - 所有檢查報告都可能需要貼上截圖
+
+### 技術架構
+
+#### 資料結構修改
+```typescript
+// types/index.ts
+
+// 新增 EuroSCORE 檢查類型
+export type ExaminationType =
+  | ... (現有類型)
+  | 'euroscore'  // 新增
+
+// 更新檢查配置
+export const EXAMINATION_INPUT_CONFIG = {
+  // ... 現有配置
+  'euroscore': {
+    hasText: true,
+    hasImages: true,
+    placeholder: '請輸入 EuroSCORE 百分比（例如：8.5）',
+  },
+}
+
+// 更新風險評估介面
+export interface RiskAssessment {
+  scoreType?: 'sts' | 'euroscore'  // 新增
+  stsScore?: string
+  euroScore?: string  // 新增
+  surgeon1: string
+  surgeon2: string
+  nyhaClass?: NYHAClass
+  urgencyReason?: string
+}
+```
+
+#### UI 組件修改
+
+**RiskAssessmentForm.tsx**:
+- 新增 scoreType state
+- 新增切換按鈕 UI（Tab 或 Toggle）
+- 條件渲染：根據 scoreType 顯示對應的輸入框和連結
+
+**ExaminationInput.tsx**:
+- 在圖片上傳區域新增 onPaste 事件監聽器
+- 實作從剪貼簿取得圖片的邏輯
+- 更新 UI 提示文字
+
+### 待辦事項
+
+**Phase 1.5 實作清單**:
+- [ ] 修改 `types/index.ts` 新增資料結構
+  - [ ] ExaminationType 新增 `'euroscore'`
+  - [ ] EXAMINATION_LABELS 新增標籤
+  - [ ] EXAMINATION_INPUT_CONFIG 新增配置
+  - [ ] RiskAssessment 介面新增 `scoreType` 和 `euroScore`
+- [ ] 修改 `RiskAssessmentForm.tsx`
+  - [ ] 新增切換按鈕 UI
+  - [ ] 實作切換邏輯（保留資料）
+  - [ ] 條件渲染輸入框與 Calculator 連結
+- [ ] 修改 `ExaminationInput.tsx`
+  - [ ] 新增 onPaste 事件處理
+  - [ ] 從剪貼簿取得圖片並進入裁切模式
+  - [ ] 更新 UI 提示
+- [ ] 檢查並更新 Zustand store（如需要）
+- [ ] 測試所有新功能
+- [ ] Git commit & push
+- [ ] Vercel 自動部署
+
+### 下次啟動重點
+1. **開始實作 Phase 1.5**：
+   - 先修改 types/index.ts（資料結構）
+   - 再修改 RiskAssessmentForm.tsx（切換功能）
+   - 最後修改 ExaminationInput.tsx（貼上功能）
+2. **測試**：逐一測試每個功能
+3. **部署**：確認 Vercel 部署成功
+
+### 專案狀態
+- **Phase 0**: ✅ 完成
+- **Phase 1**: ✅ 完成
+- **Phase 1.5**: 🔜 規劃完成，準備實作（NEW）
+  - ✅ 需求確認
+  - ✅ 技術設計
+  - ⏳ 實作待執行
+- **Phase 2**: ✅ 完成
+- **Phase 3-7**: ⏳ 待執行
+- **部署**: ✅ https://tavi-seven.vercel.app/
+
+---
+
 <!-- 新的 session 記錄請加在這裡，格式如下：
 
 ## Session: YYYY-MM-DD HH:MM

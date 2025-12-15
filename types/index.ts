@@ -80,6 +80,7 @@ export type ExaminationType =
   | 'medication-record'       // 就醫用藥
   | 'list-of-diagnosis'       // List of Diagnosis
   | 'assessment-and-plan'     // Assessment and Plan
+  | 'euroscore'               // EuroSCORE（新增）
   | 'sts-score'               // STS Score
 
 // 檢查類型標籤
@@ -98,6 +99,7 @@ export const EXAMINATION_LABELS: Record<ExaminationType, string> = {
   'medication-record': '就醫用藥',
   'list-of-diagnosis': 'List of Diagnosis',
   'assessment-and-plan': 'Assessment and Plan',
+  'euroscore': 'EuroSCORE',
   'sts-score': 'STS Score',
 }
 
@@ -178,6 +180,11 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
     hasImages: false,
     placeholder: '請貼上評估與計畫內容...',
   },
+  'euroscore': {
+    hasText: true,
+    hasImages: true,
+    placeholder: '請輸入 EuroSCORE 百分比（例如：8.5）',
+  },
   'sts-score': {
     hasText: true,
     hasImages: true,
@@ -208,7 +215,9 @@ export const NYHA_LABELS: Record<NYHAClass, string> = {
 
 // 手術風險評估
 export interface RiskAssessment {
+  scoreType?: 'sts' | 'euroscore' // 評分類型（預設 sts）
   stsScore?: string // STS Score 百分比（文字，例如：>10%）
+  euroScore?: string // EuroSCORE 百分比（新增）
   surgeon1: string // 第一位外科醫師
   surgeon2: string // 第二位外科醫師
   nyhaClass?: NYHAClass // NYHA 心功能分級

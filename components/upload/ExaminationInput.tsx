@@ -180,6 +180,33 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
     setCurrentCropImage(null)
   }
 
+  // 處理 Ctrl+V 貼上截圖
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    e.preventDefault()
+
+    const items = e.clipboardData?.items
+    if (!items) return
+
+    // 尋找圖片項目
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile()
+        if (!file) continue
+
+        // 讀取圖片並進入裁切模式
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          const imageData = event.target?.result as string
+          setCurrentCropImage(imageData)
+        }
+        reader.readAsDataURL(file)
+        break
+      }
+    }
+  }
+
   // 如果正在裁切圖片，顯示裁切介面
   if (currentCropImage) {
     return (
@@ -292,14 +319,16 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
+                onPaste={handlePaste}
                 onClick={handleClick}
+                tabIndex={0}
                 className={`
                   border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-                  transition-all duration-200
+                  transition-all duration-200 outline-none
                   ${
                     isDragging
                       ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
                   }
                 `}
               >
@@ -307,7 +336,8 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
                 <p className="text-base font-medium text-gray-700 mb-1">
                   拖放圖片到這裡，或點擊上傳
                 </p>
-                <p className="text-sm text-gray-500">支援 JPG、PNG 格式，每次上傳一張（可多次上傳）</p>
+                <p className="text-sm text-gray-500 mb-1">支援 JPG、PNG 格式，每次上傳一張（可多次上傳）</p>
+                <p className="text-xs text-blue-600 font-medium">💡 提示：可按 Ctrl+V 直接貼上截圖</p>
                 <input
                   ref={fileInputRef}
                   type="file"

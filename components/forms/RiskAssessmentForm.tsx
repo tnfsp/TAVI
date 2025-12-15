@@ -34,14 +34,31 @@ const URGENCY_TEMPLATES = [
 ]
 
 const riskAssessmentSchema = z.object({
-  stsScore: z.string().min(1, '請輸入 STS Score'),
+  scoreType: z.enum(['sts', 'euroscore']).optional(),
+  stsScore: z.string().optional(),
+  euroScore: z.string().optional(),
   surgeon1: z.string().min(1, '請輸入第一位外科醫師姓名'),
   surgeon2: z.string().min(1, '請輸入第二位外科醫師姓名'),
   nyhaClass: z.enum(['I', 'II', 'III', 'IV'], {
     message: '請選擇 NYHA 心功能分級',
   }),
   urgencyReason: z.string().min(1, '請說明手術適應症與緊急性'),
-})
+}).refine(
+  (data) => {
+    // 根據 scoreType 驗證對應的 score 欄位
+    if (data.scoreType === 'sts') {
+      return !!data.stsScore && data.stsScore.trim().length > 0
+    } else if (data.scoreType === 'euroscore') {
+      return !!data.euroScore && data.euroScore.trim().length > 0
+    }
+    // 預設要求 STS Score
+    return !!data.stsScore && data.stsScore.trim().length > 0
+  },
+  {
+    message: '請輸入風險評分',
+    path: ['stsScore'], // 錯誤訊息顯示位置
+  }
+)
 
 type RiskAssessmentFormData = z.infer<typeof riskAssessmentSchema>
 
@@ -63,7 +80,9 @@ export function RiskAssessmentForm({
   } = useForm<RiskAssessmentFormData>({
     resolver: zodResolver(riskAssessmentSchema),
     defaultValues: {
+      scoreType: defaultValues?.scoreType || 'sts',
       stsScore: defaultValues?.stsScore || '',
+      euroScore: defaultValues?.euroScore || '',
       surgeon1: defaultValues?.surgeon1 || '',
       surgeon2: defaultValues?.surgeon2 || '',
       nyhaClass: defaultValues?.nyhaClass || undefined,
@@ -71,6 +90,7 @@ export function RiskAssessmentForm({
     },
   })
 
+  const scoreType = watch('scoreType')
   const nyhaClass = watch('nyhaClass')
   const urgencyReason = watch('urgencyReason')
 
@@ -91,37 +111,100 @@ export function RiskAssessmentForm({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* STS Score */}
-          <div className="space-y-2">
-            <Label htmlFor="stsScore" className="flex items-center gap-2 text-base">
+          {/* 風險評分類型選擇 */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2 text-base">
               <FileText className="w-4 h-4" />
-              STS Score <span className="text-red-500">*</span>
+              風險評分 <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="stsScore"
-              placeholder="例如：>10% 或 12.5%"
-              {...register('stsScore')}
-              aria-describedby={errors.stsScore ? 'stsScore-error' : undefined}
-              className="text-base"
-            />
-            {errors.stsScore && (
-              <p id="stsScore-error" className="text-sm text-red-500">
-                {errors.stsScore.message}
-              </p>
-            )}
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>請輸入計算好的 STS Score 百分比</span>
-              <span>•</span>
-              <a
-                href="https://riskcalc.sts.org/stswebriskcalc/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+
+            {/* 切換按鈕（Tab 樣式） */}
+            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
+              <button
+                type="button"
+                onClick={() => setValue('scoreType', 'sts', { shouldValidate: true })}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  scoreType === 'sts'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                開啟 STS Calculator
-                <ExternalLink className="w-3 h-3" />
-              </a>
+                STS Score
+              </button>
+              <button
+                type="button"
+                onClick={() => setValue('scoreType', 'euroscore', { shouldValidate: true })}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  scoreType === 'euroscore'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                EuroSCORE
+              </button>
             </div>
+
+            {/* STS Score 輸入（條件顯示） */}
+            {scoreType === 'sts' && (
+              <div className="space-y-2">
+                <Input
+                  id="stsScore"
+                  placeholder="例如：>10% 或 12.5%"
+                  {...register('stsScore')}
+                  aria-describedby={errors.stsScore ? 'stsScore-error' : undefined}
+                  className="text-base"
+                />
+                {errors.stsScore && (
+                  <p id="stsScore-error" className="text-sm text-red-500">
+                    {errors.stsScore.message}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span>請輸入計算好的 STS Score 百分比</span>
+                  <span>•</span>
+                  <a
+                    href="https://riskcalc.sts.org/stswebriskcalc/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    開啟 STS Calculator
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* EuroSCORE 輸入（條件顯示） */}
+            {scoreType === 'euroscore' && (
+              <div className="space-y-2">
+                <Input
+                  id="euroScore"
+                  placeholder="例如：8.5% 或 >10%"
+                  {...register('euroScore')}
+                  aria-describedby={errors.euroScore ? 'euroScore-error' : undefined}
+                  className="text-base"
+                />
+                {errors.euroScore && (
+                  <p id="euroScore-error" className="text-sm text-red-500">
+                    {errors.euroScore.message}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span>請輸入計算好的 EuroSCORE 百分比（舊版）</span>
+                  <span>•</span>
+                  <a
+                    href="http://www.euroscore.org/calc.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    開啟 EuroSCORE Calculator
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 外科醫師評估 */}

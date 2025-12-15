@@ -574,6 +574,47 @@
    - 驗證 Word 文件格式是否符合健保局要求
    - 使用真實資料測試完整流程
 
+### 當前優先執行（UX 優化）
+**Phase 1.5: UX 優化 - EuroSCORE 與檢查輸入增強**（2025-12-15 新增）
+
+#### 1. 新增 EuroSCORE 檢查類型
+**位置**：步驟 5 - 檢查報告輸入
+- [ ] 修改 `types/index.ts`：
+  - ExaminationType 新增 `'euroscore'`
+  - EXAMINATION_LABELS 新增 `'euroscore': 'EuroSCORE'`
+  - EXAMINATION_INPUT_CONFIG 新增配置（文字 + 圖片）
+- [ ] 自動整合到 ExaminationInput 組件（無需修改組件）
+- [ ] 測試：可在檢查類型下拉選單中選擇 EuroSCORE
+
+#### 2. 風險評估表單新增切換按鈕
+**位置**：步驟 6 - 手術風險評估與適應症
+- [ ] 修改 `types/index.ts`：
+  - RiskAssessment 介面新增 `scoreType?: 'sts' | 'euroscore'`（預設 'sts'）
+  - RiskAssessment 介面新增 `euroScore?: string`
+- [ ] 修改 `RiskAssessmentForm.tsx`：
+  - 在 STS Score 輸入框上方新增切換按鈕（Tab 式或 Toggle）
+  - 根據 scoreType 顯示對應的輸入框
+  - STS 模式：顯示 STS Score 輸入 + STS Calculator 連結
+  - EuroSCORE 模式：顯示 EuroSCORE 輸入 + EuroSCORE Calculator 連結
+  - 切換時保留兩邊資料（不清空）
+- [ ] 更新 Zustand store：支援新的 scoreType 和 euroScore 欄位
+
+#### 3. 檢查輸入支援貼上截圖
+**位置**：所有檢查類型的圖片上傳區
+- [ ] 修改 `ExaminationInput.tsx`：
+  - 在圖片上傳區域新增 onPaste 事件監聽
+  - 從 clipboard 取得圖片資料
+  - 自動進入裁切模式
+  - 在 UI 提示「支援 Ctrl+V 貼上截圖」
+- [ ] 測試：複製截圖後按 Ctrl+V 可直接貼上
+
+#### 4. 測試與部署
+- [ ] 測試 EuroSCORE 檢查類型輸入
+- [ ] 測試風險評估表單切換功能
+- [ ] 測試貼上截圖功能
+- [ ] Git commit & push
+- [ ] Vercel 自動部署
+
 ### 當前可執行（無需 API）
 1. **開始 Phase 3 - 簽名文件上傳功能**：
    - 設計文件上傳組件 (PDF/圖片)
@@ -607,3 +648,4 @@
 | 2025-12-14 | v1.0 | 初版建立，完整規劃 7 個 Phase |
 | 2025-12-14 | v2.0 | **重大更新**：基於文件分析結果，重新規劃 Phase 2-4<br>- Phase 0-1: 標記為已完成 (100%)<br>- Phase 2: 改為「外科醫師評估文件生成」<br>- Phase 3: 改為「簽名文件上傳功能」<br>- Phase 4: 改為「事前審查文件生成」(13 區塊)<br>- 確立兩文件工作流程：醫師評估 → 簽名 → 最終申請<br>- 新增檔案命名規則與紅色標註需求 |
 | 2025-12-14 | v3.0 | **進度更新**：<br>- ✅ Phase 2 已完成（AI 摘要生成、Word 匯出、Vercel 部署）<br>- ✅ M3 里程碑達成（醫師評估文件生成）<br>- ✅ M8 里程碑達成（Vercel 部署）<br>- 更新「下一步行動」：區分配額恢復後與當前可執行任務<br>- 已知限制：Claude API 配額到 2026-01-01 恢復<br>- 檢查類型已擴充至 15 種（含 Lab Findings 標註） |
+| 2025-12-15 | v3.1 | **新增 Phase 1.5 UX 優化**：<br>- Feature 1: 新增 EuroSCORE 檢查類型（檢查報告輸入）<br>- Feature 2: 風險評估表單新增 STS ↔ EuroSCORE 切換按鈕<br>- Feature 3: 檢查輸入支援 Ctrl+V 貼上截圖功能<br>- 詳細規劃實作步驟與資料結構設計 |
