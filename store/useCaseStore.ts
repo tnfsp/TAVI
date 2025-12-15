@@ -68,6 +68,9 @@ interface CaseStore {
 
   // 清空當前案例
   clearCase: () => void
+
+  // 載入完整案例資料（用於個案管理）
+  loadCase: (caseData: Partial<CaseData>) => void
 }
 
 export const useCaseStore = create<CaseStore>()(
@@ -291,6 +294,46 @@ export const useCaseStore = create<CaseStore>()(
         })),
 
       clearCase: () => set({ currentCase: null }),
+
+      loadCase: (caseData) =>
+        set((state) => ({
+          currentCase: state.currentCase
+            ? {
+                ...state.currentCase,
+                ...caseData,
+                updatedAt: new Date().toISOString(),
+              }
+            : {
+                id: `case-${Date.now()}`,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                patient: {
+                  name: '',
+                  chartNumber: '',
+                  gender: 'female',
+                  age: 0,
+                  birthDate: '',
+                  nationalId: '',
+                },
+                medicalHistory: [],
+                customHistory: '',
+                symptoms: [],
+                customSymptoms: '',
+                symptomOnset: '',
+                clinicalCourse: {
+                  previousCare: '',
+                  presentation: '',
+                },
+                examinations: [],
+                riskAssessment: {
+                  surgeon1: '',
+                  surgeon2: '',
+                },
+                functionalStatus: '',
+                prognosis: '',
+                ...caseData,
+              },
+        })),
     }),
     {
       name: 'tavi-case-storage', // LocalStorage key

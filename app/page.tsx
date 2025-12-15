@@ -11,6 +11,7 @@ import { ExaminationInput } from '@/components/upload/ExaminationInput'
 import { SurgeonAssessmentGenerator } from '@/components/document/SurgeonAssessmentGenerator'
 import { SignedDocumentUploader } from '@/components/upload/SignedDocumentUploader'
 import { CompleteApplicationGenerator } from '@/components/document/CompleteApplicationGenerator'
+import { CaseManagement } from '@/components/case/CaseManagement'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination, RiskAssessment, SignedDocument } from '@/types'
@@ -106,6 +107,9 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-8">
+          {/* 個案管理 */}
+          <CaseManagement />
+
           {/* 說明卡片 */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-blue-900 mb-2">📋 使用說明</h2>
