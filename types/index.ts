@@ -196,7 +196,6 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
 export interface Examination {
   id: string
   type: ExaminationType
-  date: string // YYYY-MM-DD
   textContent?: string // 文字內容（複製貼上）
   images?: string[] // 圖片陣列（base64 或 URL）
   labFindings?: string // 重要 Lab Findings 標註（僅用於 lab-report）

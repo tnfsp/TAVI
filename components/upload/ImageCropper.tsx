@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
-import { Check, X, ZoomIn } from 'lucide-react'
+import { Check, X, ZoomIn, Image as ImageIcon } from 'lucide-react'
 
 interface ImageCropperProps {
   image: string
@@ -49,6 +49,11 @@ export function ImageCropper({ image, onCropComplete, onCancel }: ImageCropperPr
       console.error('裁切失敗:', e)
       alert('裁切失敗，請重試')
     }
+  }
+
+  // 使用完整圖片（不裁切）
+  const useFullImage = () => {
+    onCropComplete(image)
   }
 
   return (
@@ -98,6 +103,16 @@ export function ImageCropper({ image, onCropComplete, onCancel }: ImageCropperPr
           >
             <X className="w-4 h-4 mr-2" />
             取消
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={useFullImage}
+            className="min-w-32 bg-green-600 hover:bg-green-700 text-white border-green-600"
+          >
+            <ImageIcon className="w-4 h-4 mr-2" />
+            使用完整圖片
           </Button>
           <Button
             type="button"

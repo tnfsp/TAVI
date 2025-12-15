@@ -20,11 +20,12 @@ export function CompleteApplicationGenerator({ caseData }: CompleteApplicationGe
   const hasExaminations = caseData.examinations.length > 0
   const hasPatientInfo = !!(caseData.patient.name && caseData.patient.chartNumber)
 
+  // 所有前置條件都必須滿足（包含 AI 評估摘要）
   const canGenerate = hasGeneratedDocument && hasExaminations && hasPatientInfo
 
   const handleGenerate = async () => {
     if (!canGenerate) {
-      setError('請先完成所有必要步驟（病患資料、檢查報告、醫師評估文件）')
+      setError('請先完成所有必要步驟（病患資料、檢查報告、醫師評估摘要）')
       return
     }
 

@@ -4,14 +4,16 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import type { CaseData } from '@/types'
+import { useCaseStore } from '@/store/useCaseStore'
 
 interface SurgeonAssessmentGeneratorProps {
   caseData: CaseData
 }
 
 export function SurgeonAssessmentGenerator({ caseData }: SurgeonAssessmentGeneratorProps) {
+  const updateGeneratedDocument = useCaseStore((state) => state.updateGeneratedDocument)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [summary, setSummary] = useState<string>('')
+  const [summary, setSummary] = useState<string>(caseData.generatedDocument || '')
   const [error, setError] = useState<string>('')
 
   // 檢查是否已完成前置步驟
@@ -51,6 +53,8 @@ export function SurgeonAssessmentGenerator({ caseData }: SurgeonAssessmentGenera
 
       const { summary: generatedSummary } = await aiResponse.json()
       setSummary(generatedSummary)
+      // 保存到 store，供步驟 9 使用
+      updateGeneratedDocument(generatedSummary)
     } catch (err) {
       console.error('Generate summary error:', err)
       setError(err instanceof Error ? err.message : '發生未知錯誤')

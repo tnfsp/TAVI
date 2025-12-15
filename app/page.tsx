@@ -184,9 +184,6 @@ export default function Home() {
                         <span className="font-medium">
                           {EXAMINATION_LABELS[exam.type]}
                         </span>
-                        <span className="text-sm text-gray-500 ml-2">
-                          ({exam.date})
-                        </span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-green-600">✓ 已儲存</span>

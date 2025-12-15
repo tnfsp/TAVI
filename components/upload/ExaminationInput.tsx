@@ -22,7 +22,6 @@ interface ExaminationInputProps {
 
 export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
   const [examType, setExamType] = useState<ExaminationType>('echocardiography')
-  const [examDate, setExamDate] = useState(new Date().toISOString().split('T')[0])
   const [textContent, setTextContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
@@ -155,7 +154,6 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
     const examination: Examination = {
       id: `exam-${Date.now()}`,
       type: examType,
-      date: examDate,
       textContent: config.hasText && examType !== 'lab-report' ? textContent : undefined,
       labFindings: examType === 'lab-report' ? textContent : undefined,
       images: config.hasImages ? images : undefined,
@@ -243,18 +241,6 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          {/* 檢查日期 */}
-          <div className="space-y-2">
-            <Label htmlFor="examDate">檢查日期</Label>
-            <Input
-              id="examDate"
-              type="date"
-              value={examDate}
-              onChange={(e) => setExamDate(e.target.value)}
-              className="text-base"
-            />
           </div>
 
           {/* 文字輸入區 */}
