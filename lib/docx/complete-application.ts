@@ -91,36 +91,24 @@ function createTextParagraphs(text: string): Paragraph[] {
 
 /**
  * 計算圖片適合的尺寸（保持原始比例）
- * 模仿 Word 的自動調整行為：
- * - 假設螢幕截圖為 96 DPI
- * - 如果圖片寬度超過頁面寬度，按比例縮小
- * - 否則保持原始尺寸
+ * 所有圖片寬度統一為 17.5cm（約 6.89 英寸），高度按比例縮放
  */
 function calculateImageSize(imageWidth: number, imageHeight: number): { width: number; height: number } {
-  // A4 頁面可用寬度（扣除邊距後約 6 英寸）
-  const maxPageWidth = 6.0
-  const maxPageHeight = 9.0 // 避免圖片太高
+  // 統一寬度為 17.5cm = 6.89 英寸
+  const targetWidthInches = 6.89
+  const maxHeightInches = 9.0 // 避免圖片太高
 
-  // 假設螢幕截圖是 96 DPI（標準螢幕解析度）
-  const dpi = 96
-  const originalWidthInches = imageWidth / dpi
-  const originalHeightInches = imageHeight / dpi
+  // 計算長寬比
+  const aspectRatio = imageWidth / imageHeight
 
-  let finalWidth = originalWidthInches
-  let finalHeight = originalHeightInches
+  // 寬度設為目標寬度
+  let finalWidth = targetWidthInches
+  let finalHeight = finalWidth / aspectRatio
 
-  // 如果寬度超過頁面寬度，按比例縮小
-  if (finalWidth > maxPageWidth) {
-    const scale = maxPageWidth / finalWidth
-    finalWidth = maxPageWidth
-    finalHeight = finalHeight * scale
-  }
-
-  // 如果高度還是超過限制，再次縮小
-  if (finalHeight > maxPageHeight) {
-    const scale = maxPageHeight / finalHeight
-    finalHeight = maxPageHeight
-    finalWidth = finalWidth * scale
+  // 如果高度超過限制，改以高度為準
+  if (finalHeight > maxHeightInches) {
+    finalHeight = maxHeightInches
+    finalWidth = finalHeight * aspectRatio
   }
 
   return { width: finalWidth, height: finalHeight }
