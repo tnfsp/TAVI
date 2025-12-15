@@ -323,7 +323,8 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
                   拖放圖片到這裡，或點擊上傳
                 </p>
                 <p className="text-sm text-gray-500 mb-1">支援 JPG、PNG 格式，每次上傳一張（可多次上傳）</p>
-                <p className="text-xs text-blue-600 font-medium">💡 提示：可按 Ctrl+V 直接貼上截圖</p>
+                <p className="text-xs text-blue-600 font-medium mb-1">💡 提示：可按 Ctrl+V 直接貼上截圖</p>
+                <p className="text-xs text-amber-600">⚠️ 建議單一案例圖片總數不超過 30 張，以確保文件生成順暢</p>
                 <input
                   ref={fileInputRef}
                   type="file"

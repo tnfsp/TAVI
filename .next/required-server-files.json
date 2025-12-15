@@ -205,6 +205,9 @@
       "proxyClientMaxBodySize": 10485760,
       "hideLogsAfterAbort": false,
       "mcpServer": true,
+      "serverActions": {
+        "bodySizeLimit": "50mb"
+      },
       "optimizePackageImports": [
         "lucide-react",
         "date-fns",

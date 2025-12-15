@@ -47,8 +47,19 @@ export function CompleteApplicationGenerator({ caseData }: CompleteApplicationGe
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || '文件生成失敗')
+        // 檢查是否為 JSON 錯誤回應
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || '文件生成失敗')
+        } else {
+          // 非 JSON 回應，可能是伺服器錯誤
+          const errorText = await response.text()
+          if (errorText.includes('Request Entity Too Large') || response.status === 413) {
+            throw new Error('上傳的圖片總大小超過限制（建議每張圖片不超過 2MB，總共不超過 20 張）')
+          }
+          throw new Error(`伺服器錯誤 (${response.status}): ${errorText.substring(0, 100)}`)
+        }
       }
 
       // 下載文件

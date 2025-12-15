@@ -51,9 +51,24 @@ export function ImageCropper({ image, onCropComplete, onCancel }: ImageCropperPr
     }
   }
 
-  // 使用完整圖片（不裁切）
-  const useFullImage = () => {
-    onCropComplete(image)
+  // 使用完整圖片（不裁切，但仍需壓縮）
+  const useFullImage = async () => {
+    try {
+      const img = await createImage(image)
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('Canvas context error')
+      ctx.drawImage(img, 0, 0)
+
+      // 智慧壓縮後傳遞（保持高品質）
+      const compressed = smartCompress(canvas)
+      onCropComplete(compressed)
+    } catch (e) {
+      console.error('壓縮失敗:', e)
+      alert('圖片處理失敗，請重試')
+    }
   }
 
   return (
@@ -156,8 +171,32 @@ async function getCroppedImg(imageSrc: string, pixelCrop: CroppedArea): Promise<
     pixelCrop.height
   )
 
-  // 轉換為 base64
-  return canvas.toDataURL('image/png')
+  // 智慧壓縮（保持高品質，只在圖片過大時才壓縮）
+  return smartCompress(canvas)
+}
+
+// 智慧壓縮圖片
+function smartCompress(canvas: HTMLCanvasElement): string {
+  // 先使用 PNG 格式（無損）
+  const png = canvas.toDataURL('image/png')
+  const pngSizeInMB = (png.length * 0.75) / (1024 * 1024)
+
+  // 如果 PNG 小於 2MB，直接使用（保持最高品質）
+  if (pngSizeInMB < 2) {
+    return png
+  }
+
+  // 如果超過 2MB，使用高品質 JPEG（0.95 幾乎無損）
+  const jpegHighQuality = canvas.toDataURL('image/jpeg', 0.95)
+  const jpegSizeInMB = (jpegHighQuality.length * 0.75) / (1024 * 1024)
+
+  // 如果高品質 JPEG 小於 3MB，使用它
+  if (jpegSizeInMB < 3) {
+    return jpegHighQuality
+  }
+
+  // 如果還是太大，使用中等品質 JPEG（0.85）
+  return canvas.toDataURL('image/jpeg', 0.85)
 }
 
 // 建立 Image 物件

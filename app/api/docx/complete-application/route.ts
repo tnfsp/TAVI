@@ -8,6 +8,11 @@ import { Packer } from 'docx'
 import { generateCompleteApplication } from '@/lib/docx/complete-application'
 import type { CaseData } from '@/types'
 
+// 增加請求大小限制到 50MB（因為可能有多張高解析度圖片）
+export const runtime = 'nodejs'
+export const maxDuration = 60 // 最長執行 60 秒
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
