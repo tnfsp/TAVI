@@ -65,6 +65,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/api/docx/complete-application/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/docx/complete-application">> = Specific
+  const handler = {} as typeof import("../../../app/api/docx/complete-application/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/api/docx/surgeon-assessment/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/docx/surgeon-assessment">> = Specific

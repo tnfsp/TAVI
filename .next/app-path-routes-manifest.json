@@ -2,6 +2,7 @@
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
   "/api/ai/generate-surgeon-assessment/route": "/api/ai/generate-surgeon-assessment",
+  "/api/docx/complete-application/route": "/api/docx/complete-application",
   "/api/docx/surgeon-assessment/route": "/api/docx/surgeon-assessment",
   "/api/test/route": "/api/test",
   "/favicon.ico/route": "/favicon.ico",

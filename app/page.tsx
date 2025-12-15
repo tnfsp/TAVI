@@ -10,6 +10,7 @@ import { RiskAssessmentForm } from '@/components/forms/RiskAssessmentForm'
 import { ExaminationInput } from '@/components/upload/ExaminationInput'
 import { SurgeonAssessmentGenerator } from '@/components/document/SurgeonAssessmentGenerator'
 import { SignedDocumentUploader } from '@/components/upload/SignedDocumentUploader'
+import { CompleteApplicationGenerator } from '@/components/document/CompleteApplicationGenerator'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination, RiskAssessment, SignedDocument } from '@/types'
@@ -239,17 +240,26 @@ export default function Home() {
             />
           </section>
 
+          {/* 步驟 9: 生成完整申請文件 */}
+          <section>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-700">步驟 9：生成完整事前審查申請文件</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                整合所有資料，生成完整的 TAVI 事前審查申請 Word 文件
+              </p>
+            </div>
+            <CompleteApplicationGenerator caseData={currentCase} />
+          </section>
+
           {/* 下一步提示 */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <h3 className="text-base font-semibold text-green-900 mb-2">✅ Phase 2 已完成</h3>
+            <h3 className="text-base font-semibold text-green-900 mb-2">✅ Phase 4 已完成</h3>
             <p className="text-green-700 text-sm mb-3">
-              目前已完成基礎資料輸入與醫師評估文件生成功能。後續階段將實作：
+              目前已完成完整申請文件生成功能。後續階段將實作：
             </p>
             <ul className="list-disc list-inside text-green-700 text-sm space-y-1">
-              <li>Phase 3：上傳已簽名的醫師評估文件</li>
-              <li>Phase 4：生成完整事前審查申請文件（13 個區塊）</li>
               <li>Phase 5：歷史案例管理</li>
-              <li>Phase 6：UI/UX 優化</li>
+              <li>Phase 6：UI/UX 優化與進階功能</li>
             </ul>
           </div>
         </div>

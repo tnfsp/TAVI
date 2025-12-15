@@ -46,6 +46,12 @@
       "namedRegex": "^/api/ai/generate\\-surgeon\\-assessment(?:/)?$"
     },
     {
+      "page": "/api/docx/complete-application",
+      "regex": "^/api/docx/complete\\-application(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/docx/complete\\-application(?:/)?$"
+    },
+    {
       "page": "/api/docx/surgeon-assessment",
       "regex": "^/api/docx/surgeon\\-assessment(?:/)?$",
       "routeKeys": {},
