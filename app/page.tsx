@@ -9,9 +9,10 @@ import { ClinicalCourseForm } from '@/components/forms/ClinicalCourseForm'
 import { RiskAssessmentForm } from '@/components/forms/RiskAssessmentForm'
 import { ExaminationInput } from '@/components/upload/ExaminationInput'
 import { SurgeonAssessmentGenerator } from '@/components/document/SurgeonAssessmentGenerator'
+import { SignedDocumentUploader } from '@/components/upload/SignedDocumentUploader'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination, RiskAssessment } from '@/types'
+import type { PatientInfo, MedicalHistoryType, SymptomType, ClinicalCourse, Examination, RiskAssessment, SignedDocument } from '@/types'
 import { EXAMINATION_LABELS } from '@/types'
 
 export default function Home() {
@@ -28,6 +29,8 @@ export default function Home() {
     addExamination,
     removeExamination,
     updateRiskAssessment,
+    updateSignedAssessment,
+    removeSignedAssessment,
   } = useCaseStore()
 
   // 初始化案例
@@ -229,19 +232,11 @@ export default function Home() {
 
           {/* 步驟 8: 上傳已簽名文件 */}
           <section>
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-gray-700">步驟 8：上傳已簽名文件</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                將兩位外科醫師簽名後的文件掃描或拍照上傳
-              </p>
-            </div>
-            <Card className="p-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-700 text-sm">
-                  📋 此功能將在 Phase 3 實作。您可以先使用步驟 7 下載文件並請醫師簽名。
-                </p>
-              </div>
-            </Card>
+            <SignedDocumentUploader
+              document={currentCase.signedSurgeonAssessment}
+              onUpload={updateSignedAssessment}
+              onRemove={removeSignedAssessment}
+            />
           </section>
 
           {/* 下一步提示 */}

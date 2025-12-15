@@ -224,6 +224,15 @@ export interface RiskAssessment {
   urgencyReason?: string // 手術緊急性/適應症說明
 }
 
+// 簽名文件資料
+export interface SignedDocument {
+  fileName: string
+  fileType: 'pdf' | 'image'
+  base64Data: string
+  uploadedAt: string
+  fileSize: number // bytes
+}
+
 // 完整案例資料
 export interface CaseData {
   id: string
@@ -241,6 +250,7 @@ export interface CaseData {
   functionalStatus: string // 日常生活狀態
   prognosis: string // 預後評估
   generatedDocument?: string // 生成的文件內容
+  signedSurgeonAssessment?: SignedDocument // 已簽名的醫師評估文件（Phase 3 新增）
 }
 
 // 表單狀態（用於多步驟表單）

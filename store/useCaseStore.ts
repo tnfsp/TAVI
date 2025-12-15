@@ -8,6 +8,7 @@ import type {
   ClinicalCourse,
   Examination,
   RiskAssessment,
+  SignedDocument,
 } from '@/types'
 
 interface CaseStore {
@@ -58,6 +59,12 @@ interface CaseStore {
 
   // 更新生成的文件
   updateGeneratedDocument: (document: string) => void
+
+  // 更新簽名文件（Phase 3 新增）
+  updateSignedAssessment: (document: SignedDocument) => void
+
+  // 移除簽名文件（Phase 3 新增）
+  removeSignedAssessment: () => void
 
   // 清空當前案例
   clearCase: () => void
@@ -256,6 +263,28 @@ export const useCaseStore = create<CaseStore>()(
             ? {
                 ...state.currentCase,
                 generatedDocument: document,
+                updatedAt: new Date().toISOString(),
+              }
+            : null,
+        })),
+
+      updateSignedAssessment: (document) =>
+        set((state) => ({
+          currentCase: state.currentCase
+            ? {
+                ...state.currentCase,
+                signedSurgeonAssessment: document,
+                updatedAt: new Date().toISOString(),
+              }
+            : null,
+        })),
+
+      removeSignedAssessment: () =>
+        set((state) => ({
+          currentCase: state.currentCase
+            ? {
+                ...state.currentCase,
+                signedSurgeonAssessment: undefined,
                 updatedAt: new Date().toISOString(),
               }
             : null,

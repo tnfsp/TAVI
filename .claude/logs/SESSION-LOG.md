@@ -936,13 +936,152 @@ export interface RiskAssessment {
 ### 專案狀態
 - **Phase 0**: ✅ 完成
 - **Phase 1**: ✅ 完成
-- **Phase 1.5**: 🔜 規劃完成，準備實作（NEW）
+- **Phase 1.5**: ✅ **規劃與實作完成**（NEW）
   - ✅ 需求確認
   - ✅ 技術設計
-  - ⏳ 實作待執行
+  - ✅ 程式碼實作
+  - ✅ Git commit & push
+  - ✅ Vercel 自動部署中
 - **Phase 2**: ✅ 完成
 - **Phase 3-7**: ⏳ 待執行
 - **部署**: ✅ https://tavi-seven.vercel.app/
+
+---
+
+## Session: 2025-12-15 PM 實作 Phase 1.5 UX 優化
+
+### 變更摘要
+- ✅ **完成 Phase 1.5 三個主要功能實作**
+  1. 新增 EuroSCORE 檢查類型（在檢查報告輸入區）
+  2. 風險評估表單新增 STS ↔ EuroSCORE 切換按鈕
+  3. 檢查輸入支援 Ctrl+V 貼上截圖功能
+- ✅ Git commit & push（Commit: f15fe5a）
+- ✅ Vercel 自動部署觸發
+
+### 實作細節
+
+#### 1. 新增 EuroSCORE 檢查類型
+**修改檔案**: `types/index.ts`
+- ExaminationType 新增 `'euroscore'`
+- EXAMINATION_LABELS 新增 `'euroscore': 'EuroSCORE'`
+- EXAMINATION_INPUT_CONFIG 新增配置：
+  ```typescript
+  'euroscore': {
+    hasText: true,
+    hasImages: true,
+    placeholder: '請輸入 EuroSCORE 百分比（例如：8.5）',
+  }
+  ```
+- ExaminationInput 組件自動支援（無需修改組件本身）
+
+#### 2. 風險評估表單新增切換功能
+**修改檔案**: `types/index.ts` + `components/forms/RiskAssessmentForm.tsx`
+
+**資料結構修改**:
+```typescript
+export interface RiskAssessment {
+  scoreType?: 'sts' | 'euroscore'  // 新增
+  stsScore?: string
+  euroScore?: string  // 新增
+  surgeon1: string
+  surgeon2: string
+  nyhaClass?: NYHAClass
+  urgencyReason?: string
+}
+```
+
+**UI 實作**:
+- 新增 Tab 樣式切換按鈕（STS Score ↔ EuroSCORE）
+- 系統預設：STS Score
+- 根據 scoreType 條件渲染對應的輸入框
+- STS 模式：顯示 STS Score 輸入 + STS Calculator 連結
+- EuroSCORE 模式：顯示 EuroSCORE 輸入 + EuroSCORE Calculator 連結
+- 切換時保留兩邊資料（使用 watch 和 setValue）
+
+**表單驗證**:
+- 使用 Zod schema 的 refine 方法
+- 根據 scoreType 驗證對應的 score 欄位
+- 確保至少填寫一種風險評分
+
+#### 3. 檢查輸入貼上截圖功能
+**修改檔案**: `components/upload/ExaminationInput.tsx`
+
+**實作內容**:
+- 新增 `handlePaste` 函數：
+  - 監聽 onPaste 事件
+  - 從 `e.clipboardData.items` 取得剪貼簿項目
+  - 尋找 `image/*` 類型的項目
+  - 使用 FileReader 讀取圖片資料
+  - 自動進入裁切模式（`setCurrentCropImage`）
+- 在拖放區域綁定 `onPaste` 事件
+- 新增 `tabIndex={0}` 使區域可聚焦（支援鍵盤操作）
+- UI 提示文字：「💡 提示：可按 Ctrl+V 直接貼上截圖」
+
+### 技術亮點
+
+#### Tab 樣式切換按鈕設計
+- 使用灰色背景容器 + 白色選中按鈕
+- 選中狀態：白色背景 + 藍色文字 + 陰影
+- 未選中狀態：灰色文字 + hover 效果
+- 平滑過渡動畫（transition-all）
+
+#### 剪貼簿圖片處理
+- 遍歷 clipboardData.items 尋找圖片
+- 使用 FileReader.readAsDataURL 轉換為 base64
+- 自動進入裁切流程（與檔案上傳、截圖流程一致）
+
+#### 表單驗證邏輯
+- 使用 Zod refine 實作動態驗證
+- 根據 scoreType 值決定驗證哪個欄位
+- 提供清晰的錯誤訊息
+
+### Git 記錄
+- **Commit**: `f15fe5a` - feat: Phase 1.5 UX 優化 - EuroSCORE 與檢查輸入增強
+- **推送**: https://github.com/tnfsp/TAVI.git (59ce076..f15fe5a)
+- **變更統計**: 5 files changed, 352 insertions(+), 32 deletions(-)
+- **修改檔案**:
+  1. `types/index.ts` - 新增資料結構
+  2. `components/forms/RiskAssessmentForm.tsx` - 切換功能
+  3. `components/upload/ExaminationInput.tsx` - 貼上功能
+  4. `.claude/docs/IMPLEMENTATION-PLAN.md` - 更新計畫 v3.1
+  5. `.claude/logs/SESSION-LOG.md` - 記錄規劃與實作
+
+### 測試計畫（待執行）
+部署完成後需測試：
+1. **EuroSCORE 檢查類型**：
+   - 在檢查報告下拉選單中可看到 EuroSCORE
+   - 可輸入文字（百分比）
+   - 可上傳圖片/截圖
+2. **切換功能**：
+   - 點擊切換按鈕可在 STS ↔ EuroSCORE 間切換
+   - 切換時 UI 正確顯示對應的輸入框和連結
+   - 兩邊的資料都被保留（不會遺失）
+3. **貼上截圖**：
+   - 複製截圖後，在圖片上傳區按 Ctrl+V
+   - 自動進入裁切模式
+   - 裁切後圖片正確加入清單
+
+### 下次啟動重點
+1. **測試所有新功能**（部署完成後）
+2. **收集使用者反饋**
+3. **準備 Phase 3**（簽名文件上傳功能）
+
+### 專案狀態
+- **Phase 0**: ✅ 完成
+- **Phase 1**: ✅ 完成
+- **Phase 1.5**: ✅ **完成**（2025-12-15）
+  - Feature 1: ✅ EuroSCORE 檢查類型
+  - Feature 2: ✅ STS ↔ EuroSCORE 切換
+  - Feature 3: ✅ Ctrl+V 貼上截圖
+- **Phase 2**: ✅ 完成
+- **Phase 3-7**: ⏳ 待執行
+- **部署**: ✅ https://tavi-seven.vercel.app/ (自動部署中)
+
+### 效能指標
+- 新增檢查類型數量：16 種（+1 EuroSCORE）
+- 程式碼變更：352 行新增，32 行刪除
+- 實作時間：約 30 分鐘
+- Git commit 數：1 個（整合式提交）
 
 ---
 
