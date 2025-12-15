@@ -11,6 +11,7 @@ import {
   HeadingLevel,
   ImageRun,
   convertInchesToTwip,
+  LineRuleType,
 } from 'docx'
 import type { CaseData, Examination } from '@/types'
 
@@ -81,8 +82,10 @@ function createTextParagraphs(text: string): Paragraph[] {
         })
       ],
       spacing: {
-        line: 360, // 1.5 倍行距
-        after: 120, // 段落後間距
+        before: 0, // 段前 0 pt
+        after: 0,  // 段後 0 pt
+        line: 360, // 行距值（12pt * 1.5 = 18pt = 360 twips）
+        lineRule: LineRuleType.AT_LEAST, // 最小值
       },
       alignment: AlignmentType.JUSTIFIED,
     })
