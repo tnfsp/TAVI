@@ -61,58 +61,66 @@ function createDivider(): Paragraph {
 
 /**
  * 建立文字段落（支援換行）
+ * 每一行建立獨立的段落，模仿 Word 的自然換行行為
  */
-function createTextParagraph(text: string): Paragraph {
+function createTextParagraphs(text: string): Paragraph[] {
   // 將文字按換行符號分割
   const lines = text.split('\n')
 
-  // 為每一行創建 TextRun，行與行之間加入換行
-  const children: (TextRun)[] = []
-  lines.forEach((line, index) => {
-    children.push(
-      new TextRun({
-        text: line,
-        font: {
-          name: '標楷體',
-          eastAsia: '標楷體',
-        },
-        size: 24, // 12pt
-      })
-    )
-    // 除了最後一行，都加入換行符號
-    if (index < lines.length - 1) {
-      children.push(
+  // 為每一行建立獨立的 Paragraph
+  return lines.map(line =>
+    new Paragraph({
+      children: [
         new TextRun({
-          break: 1,
+          text: line,
+          font: {
+            name: '標楷體',
+            eastAsia: '標楷體',
+          },
+          size: 24, // 12pt
         })
-      )
-    }
-  })
-
-  return new Paragraph({
-    children,
-    spacing: { line: 360 }, // 1.5 倍行距
-    alignment: AlignmentType.JUSTIFIED,
-  })
+      ],
+      spacing: {
+        line: 360, // 1.5 倍行距
+        after: 120, // 段落後間距
+      },
+      alignment: AlignmentType.JUSTIFIED,
+    })
+  )
 }
 
 /**
  * 計算圖片適合的尺寸（保持原始比例）
+ * 模仿 Word 的自動調整行為：
+ * - 假設螢幕截圖為 96 DPI
+ * - 如果圖片寬度超過頁面寬度，按比例縮小
+ * - 否則保持原始尺寸
  */
 function calculateImageSize(imageWidth: number, imageHeight: number): { width: number; height: number } {
-  const maxWidthInches = 5.5 // A4 有效寬度約 6.5 英寸，留點邊距用 5.5
-  const maxHeightInches = 8.5 // 最大高度限制，避免直式圖片過高
+  // A4 頁面可用寬度（扣除邊距後約 6 英寸）
+  const maxPageWidth = 6.0
+  const maxPageHeight = 9.0 // 避免圖片太高
 
-  // 計算原始比例
-  const aspectRatio = imageWidth / imageHeight
+  // 假設螢幕截圖是 96 DPI（標準螢幕解析度）
+  const dpi = 96
+  const originalWidthInches = imageWidth / dpi
+  const originalHeightInches = imageHeight / dpi
 
-  let finalWidth = maxWidthInches
-  let finalHeight = finalWidth / aspectRatio
+  let finalWidth = originalWidthInches
+  let finalHeight = originalHeightInches
 
-  // 如果高度超過限制，以高度為準重新計算
-  if (finalHeight > maxHeightInches) {
-    finalHeight = maxHeightInches
-    finalWidth = finalHeight * aspectRatio
+  // 如果寬度超過頁面寬度，按比例縮小
+  if (finalWidth > maxPageWidth) {
+    const scale = maxPageWidth / finalWidth
+    finalWidth = maxPageWidth
+    finalHeight = finalHeight * scale
+  }
+
+  // 如果高度還是超過限制，再次縮小
+  if (finalHeight > maxPageHeight) {
+    const scale = maxPageHeight / finalHeight
+    finalHeight = maxPageHeight
+    finalWidth = finalWidth * scale
   }
 
   return { width: finalWidth, height: finalHeight }
@@ -207,7 +215,7 @@ function createExaminationSection(
 
   // 文字內容
   if (exam.textContent) {
-    sections.push(createTextParagraph(exam.textContent))
+    sections.push(...createTextParagraphs(exam.textContent))
   }
 
   // Lab Findings（如果是檢驗報告）
@@ -285,7 +293,7 @@ export async function generateCompleteApplication(
     spacing: { before: 0, after: 400 },
   }))
 
-  sections.push(createTextParagraph(summaryContent))
+  sections.push(...createTextParagraphs(summaryContent))
   sections.push(createDivider())
 
   // ========== 2-16. 檢查報告區塊（動態組裝） ==========
