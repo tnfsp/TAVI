@@ -295,45 +295,48 @@ export const useCaseStore = create<CaseStore>()(
 
       clearCase: () => set({ currentCase: null }),
 
-      loadCase: (caseData) =>
-        set((state) => ({
-          currentCase: state.currentCase
-            ? {
-                ...state.currentCase,
-                ...caseData,
-                updatedAt: new Date().toISOString(),
-              }
-            : {
-                id: `case-${Date.now()}`,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                patient: {
-                  name: '',
-                  chartNumber: '',
-                  gender: 'female',
-                  age: 0,
-                  birthDate: '',
-                  nationalId: '',
-                },
-                medicalHistory: [],
-                customHistory: '',
-                symptoms: [],
-                customSymptoms: '',
-                symptomOnset: '',
-                clinicalCourse: {
-                  previousCare: '',
-                  presentation: '',
-                },
-                examinations: [],
-                riskAssessment: {
-                  surgeon1: '',
-                  surgeon2: '',
-                },
-                functionalStatus: '',
-                prognosis: '',
-                ...caseData,
-              },
-        })),
+      // 載入個案時，始終生成新的 ID 以確保表單重新初始化
+      loadCase: (caseData) => {
+        const now = new Date().toISOString()
+        const newId = `case-${Date.now()}`
+
+        return set(() => ({
+          currentCase: {
+            id: newId,
+            createdAt: now,
+            updatedAt: now,
+            patient: {
+              name: '',
+              chartNumber: '',
+              gender: 'female',
+              age: 0,
+              birthDate: '',
+              nationalId: '',
+              ...caseData.patient,
+            },
+            medicalHistory: caseData.medicalHistory || [],
+            customHistory: caseData.customHistory || '',
+            symptoms: caseData.symptoms || [],
+            customSymptoms: caseData.customSymptoms || '',
+            symptomOnset: caseData.symptomOnset || '',
+            clinicalCourse: {
+              previousCare: '',
+              presentation: '',
+              ...caseData.clinicalCourse,
+            },
+            examinations: caseData.examinations || [],
+            riskAssessment: {
+              surgeon1: '',
+              surgeon2: '',
+              ...caseData.riskAssessment,
+            },
+            functionalStatus: caseData.functionalStatus || '',
+            prognosis: caseData.prognosis || '',
+            generatedDocument: caseData.generatedDocument,
+            signedSurgeonAssessment: caseData.signedSurgeonAssessment,
+          },
+        }))
+      },
     }),
     {
       name: 'tavi-case-storage', // LocalStorage key

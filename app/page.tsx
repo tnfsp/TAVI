@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useCaseStore } from '@/store/useCaseStore'
 import { PatientInfoForm } from '@/components/forms/PatientInfoForm'
 import { MedicalHistorySelector } from '@/components/forms/MedicalHistorySelector'
@@ -29,11 +29,15 @@ export default function Home() {
     updateSymptomOnset,
     updateClinicalCourse,
     addExamination,
+    updateExamination,
     removeExamination,
     updateRiskAssessment,
     updateSignedAssessment,
     removeSignedAssessment,
   } = useCaseStore()
+
+  // 編輯中的檢查報告
+  const [editingExamination, setEditingExamination] = useState<Examination | null>(null)
 
   // 初始化案例
   useEffect(() => {
@@ -65,7 +69,23 @@ export default function Home() {
   }
 
   const handleExaminationSubmit = (examination: Examination) => {
-    addExamination(examination)
+    if (editingExamination) {
+      // 更新既有檢查
+      updateExamination(examination.id, examination)
+    } else {
+      // 新增檢查
+      addExamination(examination)
+    }
+  }
+
+  const handleEditExamination = (exam: Examination) => {
+    setEditingExamination(exam)
+    // 滾動到檢查報告輸入區
+    document.getElementById('examination-input')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingExamination(null)
   }
 
   const handleRiskAssessmentSubmit = (data: RiskAssessment) => {
@@ -125,6 +145,7 @@ export default function Home() {
               <h2 className="text-lg font-semibold text-gray-700">步驟 1：病患基本資料</h2>
             </div>
             <PatientInfoForm
+              key={`patient-${currentCase.id}`}
               defaultValues={currentCase.patient}
               onSubmit={handlePatientSubmit}
             />
@@ -136,6 +157,7 @@ export default function Home() {
               <h2 className="text-lg font-semibold text-gray-700">步驟 2：病史選擇</h2>
             </div>
             <MedicalHistorySelector
+              key={`history-${currentCase.id}`}
               defaultValues={currentCase.medicalHistory}
               defaultCustomHistory={currentCase.customHistory}
               onSubmit={handleMedicalHistorySubmit}
@@ -148,6 +170,7 @@ export default function Home() {
               <h2 className="text-lg font-semibold text-gray-700">步驟 3：症狀選擇</h2>
             </div>
             <SymptomSelector
+              key={`symptoms-${currentCase.id}`}
               defaultValues={{
                 symptoms: currentCase.symptoms,
                 symptomOnset: currentCase.symptomOnset,
@@ -162,20 +185,25 @@ export default function Home() {
               <h2 className="text-lg font-semibold text-gray-700">步驟 4：就醫歷程</h2>
             </div>
             <ClinicalCourseForm
+              key={`clinical-${currentCase.id}`}
               defaultValues={currentCase.clinicalCourse}
               onSubmit={handleClinicalCourseSubmit}
             />
           </section>
 
           {/* 步驟 5: 檢查報告上傳 */}
-          <section>
+          <section id="examination-input">
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-gray-700">步驟 5：檢查報告輸入</h2>
               <p className="text-sm text-gray-500 mt-1">
                 請選擇檢查類型，並上傳圖片或輸入報告內容（可多次上傳不同檢查）
               </p>
             </div>
-            <ExaminationInput onSubmit={handleExaminationSubmit} />
+            <ExaminationInput
+              onSubmit={handleExaminationSubmit}
+              editingExamination={editingExamination}
+              onCancelEdit={handleCancelEdit}
+            />
 
             {/* 已上傳的檢查列表 */}
             {currentCase.examinations.length > 0 && (
@@ -184,13 +212,26 @@ export default function Home() {
                 <div className="space-y-3">
                   {currentCase.examinations.map((exam) => (
                     <div key={exam.id} className="flex items-center justify-between p-3 bg-gray-50 rounded group hover:bg-gray-100 transition-colors">
-                      <div>
+                      <div className="flex-1">
                         <span className="font-medium">
                           {EXAMINATION_LABELS[exam.type]}
                         </span>
+                        {exam.date && (
+                          <span className="text-sm text-gray-500 ml-2">
+                            ({exam.date})
+                          </span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <span className="text-sm text-green-600">✓ 已儲存</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditExamination(exam)}
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          編輯
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -216,6 +257,7 @@ export default function Home() {
               </p>
             </div>
             <RiskAssessmentForm
+              key={`risk-${currentCase.id}`}
               defaultValues={currentCase.riskAssessment}
               onSubmit={handleRiskAssessmentSubmit}
             />

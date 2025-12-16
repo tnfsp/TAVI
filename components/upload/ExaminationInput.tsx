@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -20,9 +20,11 @@ import { ImageCropper } from './ImageCropper'
 
 interface ExaminationInputProps {
   onSubmit: (examination: Examination) => void
+  editingExamination?: Examination | null
+  onCancelEdit?: () => void
 }
 
-export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
+export function ExaminationInput({ onSubmit, editingExamination, onCancelEdit }: ExaminationInputProps) {
   const [examType, setExamType] = useState<ExaminationType>('echocardiography')
   const [examDate, setExamDate] = useState('')
   const [textContent, setTextContent] = useState('')
@@ -31,6 +33,18 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
   const [isCapturing, setIsCapturing] = useState(false)
   const [currentCropImage, setCurrentCropImage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const isEditing = !!editingExamination
+
+  // 當進入編輯模式時，載入既有資料
+  useEffect(() => {
+    if (editingExamination) {
+      setExamType(editingExamination.type)
+      setExamDate(editingExamination.date || '')
+      setTextContent(editingExamination.textContent || editingExamination.labFindings || '')
+      setImages(editingExamination.images || [])
+    }
+  }, [editingExamination])
 
   const config = EXAMINATION_INPUT_CONFIG[examType]
   const needsDate = EXAMINATION_TYPES_WITH_DATE.includes(examType)
@@ -162,7 +176,7 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
     }
 
     const examination: Examination = {
-      id: `exam-${Date.now()}`,
+      id: isEditing ? editingExamination!.id : `exam-${Date.now()}`,
       type: examType,
       date: needsDate ? examDate : undefined,
       textContent: config.hasText && examType !== 'lab-report' ? textContent : undefined,
@@ -173,10 +187,26 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
     onSubmit(examination)
 
     // 清空表單
+    setExamType('echocardiography')
     setExamDate('')
     setTextContent('')
     setImages([])
-    alert('檢查報告已儲存！')
+
+    if (isEditing && onCancelEdit) {
+      onCancelEdit()
+      alert('檢查報告已更新！')
+    } else {
+      alert('檢查報告已儲存！')
+    }
+  }
+
+  // 取消編輯
+  const handleCancelEdit = () => {
+    setExamType('echocardiography')
+    setExamDate('')
+    setTextContent('')
+    setImages([])
+    onCancelEdit?.()
   }
 
   // 裁切完成處理
@@ -229,11 +259,13 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
   }
 
   return (
-    <Card>
+    <Card className={isEditing ? 'border-blue-500 border-2' : ''}>
       <CardHeader>
-        <CardTitle className="text-xl">檢查報告輸入</CardTitle>
+        <CardTitle className="text-xl">
+          {isEditing ? `編輯檢查報告：${EXAMINATION_LABELS[examType]}` : '檢查報告輸入'}
+        </CardTitle>
         <p className="text-sm text-gray-500">
-          請選擇檢查類型並輸入相關資料
+          {isEditing ? '修改檢查內容後點擊「更新」儲存變更' : '請選擇檢查類型並輸入相關資料'}
         </p>
       </CardHeader>
       <CardContent>
@@ -424,9 +456,20 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
           )}
 
           {/* 提交按鈕 */}
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            {isEditing && (
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="text-base px-8"
+                onClick={handleCancelEdit}
+              >
+                取消編輯
+              </Button>
+            )}
             <Button type="submit" size="lg" className="text-base px-8">
-              儲存檢查報告
+              {isEditing ? '更新檢查報告' : '儲存檢查報告'}
             </Button>
           </div>
         </form>
