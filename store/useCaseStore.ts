@@ -337,7 +337,31 @@ export const useCaseStore = create<CaseStore>()(
     }),
     {
       name: 'tavi-case-storage', // LocalStorage key
-      partialize: (state) => ({ currentCase: state.currentCase }), // 只持久化 currentCase
+      // 自訂序列化：排除大型圖片資料以避免 localStorage 配額限制
+      partialize: (state) => {
+        if (!state.currentCase) {
+          return { currentCase: null }
+        }
+
+        // 複製 currentCase 但排除圖片資料
+        const caseWithoutImages = {
+          ...state.currentCase,
+          // 排除檢查報告中的圖片（只保留文字內容）
+          examinations: state.currentCase.examinations.map((exam) => ({
+            ...exam,
+            images: [], // 清空圖片陣列
+          })),
+          // 排除已簽名文件的 base64 資料
+          signedSurgeonAssessment: state.currentCase.signedSurgeonAssessment
+            ? {
+                ...state.currentCase.signedSurgeonAssessment,
+                base64Data: '', // 清空 base64 資料
+              }
+            : undefined,
+        }
+
+        return { currentCase: caseWithoutImages }
+      },
     }
   )
 )
