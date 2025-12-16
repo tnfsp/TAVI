@@ -11,8 +11,10 @@ import {
   type ExaminationType,
   EXAMINATION_LABELS,
   EXAMINATION_INPUT_CONFIG,
+  EXAMINATION_TYPES_WITH_DATE,
   type Examination,
 } from '@/types'
+import { Calendar } from 'lucide-react'
 import { Upload, Monitor, X, Image as ImageIcon, FileText, ExternalLink } from 'lucide-react'
 import { ImageCropper } from './ImageCropper'
 
@@ -22,6 +24,7 @@ interface ExaminationInputProps {
 
 export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
   const [examType, setExamType] = useState<ExaminationType>('echocardiography')
+  const [examDate, setExamDate] = useState('')
   const [textContent, setTextContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
@@ -30,6 +33,7 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const config = EXAMINATION_INPUT_CONFIG[examType]
+  const needsDate = EXAMINATION_TYPES_WITH_DATE.includes(examType)
 
   // 處理檔案上傳（進入裁切模式）
   const handleFileUpload = async (files: FileList) => {
@@ -140,6 +144,12 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    // 驗證日期（僅限需要日期的檢查類型）
+    if (needsDate && !examDate) {
+      alert('請選擇檢查日期')
+      return
+    }
+
     // 驗證
     if (config.hasText && !textContent.trim()) {
       alert('請輸入報告內容')
@@ -154,6 +164,7 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
     const examination: Examination = {
       id: `exam-${Date.now()}`,
       type: examType,
+      date: needsDate ? examDate : undefined,
       textContent: config.hasText && examType !== 'lab-report' ? textContent : undefined,
       labFindings: examType === 'lab-report' ? textContent : undefined,
       images: config.hasImages ? images : undefined,
@@ -162,6 +173,7 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
     onSubmit(examination)
 
     // 清空表單
+    setExamDate('')
     setTextContent('')
     setImages([])
     alert('檢查報告已儲存！')
@@ -242,6 +254,28 @@ export function ExaminationInput({ onSubmit }: ExaminationInputProps) {
               </SelectContent>
             </Select>
           </div>
+
+          {/* 檢查日期（僅適用於特定檢查類型） */}
+          {needsDate && (
+            <div className="space-y-2">
+              <Label htmlFor="examDate" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                檢查日期
+                <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="examDate"
+                type="date"
+                value={examDate}
+                onChange={(e) => setExamDate(e.target.value)}
+                className="text-base"
+                required
+              />
+              <p className="text-sm text-gray-500">
+                請選擇此檢查的實際執行日期
+              </p>
+            </div>
+          )}
 
           {/* 文字輸入區 */}
           {config.hasText && (

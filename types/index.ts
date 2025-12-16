@@ -192,10 +192,23 @@ export const EXAMINATION_INPUT_CONFIG: Record<ExaminationType, ExaminationInputC
   },
 }
 
+// 需要填寫日期的檢查類型
+export const EXAMINATION_TYPES_WITH_DATE: ExaminationType[] = [
+  'echocardiography',        // 心臟超音波
+  'catheterization',         // 心導管檢查
+  'ekg',                     // 心電圖
+  'chest-xray',              // 胸部 X 光
+  'pulmonary-function',      // 肺功能檢查
+  'abi',                     // 四肢血流探測
+  'heart-ct',                // Heart CT
+  'myocardial-perfusion-scan', // 心肌灌注掃描
+]
+
 // 檢查報告資料結構
 export interface Examination {
   id: string
   type: ExaminationType
+  date?: string // 檢查日期（YYYY-MM-DD 格式），僅適用於特定檢查類型
   textContent?: string // 文字內容（複製貼上）
   images?: string[] // 圖片陣列（base64 或 URL）
   labFindings?: string // 重要 Lab Findings 標註（僅用於 lab-report）
