@@ -2135,18 +2135,31 @@ const handleGenerate = async () => {
 2. **Commit** `7c42906`: fix: 移除 convertInchesToTwip，手動計算 twips 值
 3. **Commit** `3716949`: docs: 記錄 2025-12-15 Session 工作內容
 4. **Commit** `4d0a79e`: fix: 移至前端生成文件避免 Vercel 4.5MB 請求限制
+5. **Commit** `d12cff2`: fix: 排除圖片資料的 localStorage 持久化避免配額超限
+
+---
+
+#### 3. 修正 localStorage 配額超限錯誤
+- **問題**：上傳已簽名文件後顯示 "Failed to execute 'setItem' on 'Storage': exceeded the quota"
+- **根本原因**：Zustand persist 會將所有資料存入 localStorage（約 5-10MB 限制）
+- **修正方案**：修改 `partialize` 函數，排除圖片資料的持久化
+  - 檢查報告圖片（`examinations[].images`）不存入 localStorage
+  - 已簽名文件（`signedSurgeonAssessment.base64Data`）不存入 localStorage
+- **注意**：圖片資料只存在於記憶體中，頁面重新整理後需重新上傳
+- **替代方案**：使用者可透過「儲存個案」功能匯出完整 JSON（含圖片）
 
 ### 待辦事項
 - [x] 修正圖片大小單位（twips → EMUs → **Pixels**）
 - [x] 修正 Word 無法開啟的錯誤
 - [x] 修正「上傳資料總大小超過限制」錯誤
 - [x] 建立瀏覽器相容的文件生成器
+- [x] 修正 localStorage 配額超限錯誤
 - [x] Build 驗證通過
 - [x] Git commit & push
 - [ ] **測試完整流程**
-  - [ ] 在 https://tavi-seven.vercel.app/ 測試
+  - [x] 在 https://tavi-seven.vercel.app/ 測試
   - [ ] 確認圖片大小正確（17.5cm 寬）
-  - [ ] 確認可上傳已簽名文件並成功生成
+  - [x] 確認可上傳已簽名文件並成功生成
 
 ### 專案狀態
 - **Phase 0-3**: ✅ 完成
