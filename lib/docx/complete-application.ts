@@ -163,12 +163,14 @@ function createImageParagraph(base64Data: string): Paragraph {
     // 取得圖片原始尺寸
     const { width: imgWidth, height: imgHeight } = getImageDimensions(imageBuffer)
 
-    // 計算適合的顯示尺寸
+    // 計算適合的顯示尺寸（英寸）
     const { width, height } = calculateImageSize(imgWidth, imgHeight)
 
-    // 手動計算 twips (1 inch = 1440 twips)
-    const widthInTwips = Math.round(width * 1440)
-    const heightInTwips = Math.round(height * 1440)
+    // docx.js ImageRun transformation 使用 EMUs (English Metric Units)
+    // 1 inch = 914400 EMUs
+    const EMUS_PER_INCH = 914400
+    const widthInEMUs = Math.round(width * EMUS_PER_INCH)
+    const heightInEMUs = Math.round(height * EMUS_PER_INCH)
 
     return new Paragraph({
       children: [
@@ -176,8 +178,8 @@ function createImageParagraph(base64Data: string): Paragraph {
           type: format,
           data: Uint8Array.from(imageBuffer),
           transformation: {
-            width: widthInTwips,
-            height: heightInTwips,
+            width: widthInEMUs,
+            height: heightInEMUs,
           },
         } as any),
       ],
