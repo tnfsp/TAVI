@@ -2045,3 +2045,115 @@ const heightInEMUs = Math.round(height * EMUS_PER_INCH)
 - **部署**: ✅ https://tavi-seven.vercel.app/ (自動部署中)
 
 ---
+
+## Session: 2025-12-16 修正圖片單位錯誤 + 前端文件生成
+
+### 變更摘要
+
+#### 1. 修正圖片大小單位（EMUs → Pixels）
+- **問題**：前次使用 EMUs 修正後，Word 無法開啟文件（發生錯誤）
+- **根本原因**：docx.js `ImageRun` transformation 實際上使用的是 **pixels at 96 DPI**
+- **參考來源**：[GitHub Discussion #2709](https://github.com/dolanmiu/docx/discussions/2709)
+- **修正**：
+  ```typescript
+  // 正確：使用像素（96 DPI）
+  const DPI = 96
+  const widthInPixels = Math.round(width * DPI)
+  const heightInPixels = Math.round(height * DPI)
+  ```
+
+#### 2. 修正「上傳資料總大小超過限制」錯誤
+- **問題**：上傳已簽名的醫師評估文件後，不論圖片多小，都會顯示「上傳的資料總大小超過限制（100MB）」
+- **根本原因**：Vercel Serverless Functions 有 **4.5MB 請求限制**（Hobby plan）
+  - `bodySizeLimit: '100mb'` 只對 Server Actions 有效
+  - API Routes `/api/docx/complete-application` 不受此設定影響
+- **修正方案**：移至前端生成文件，不再透過 API 傳送大量 Base64 資料
+  - 新增 `lib/docx/complete-application-client.ts`（瀏覽器相容版本）
+  - 使用 `Uint8Array` 代替 `Buffer`（瀏覽器不支援 Buffer）
+  - 使用 `atob()` 進行 Base64 解碼
+  - 使用 `Packer.toBlob()` 代替 `Packer.toBuffer()`
+
+### 決策記錄
+
+#### 1. docx.js ImageRun 單位：Pixels (96 DPI)
+- **錯誤嘗試 1**：twips (1 inch = 1440 twips) → 圖片 262cm
+- **錯誤嘗試 2**：EMUs (1 inch = 914400 EMUs) → Word 無法開啟
+- **正確方式**：pixels (1 inch = 96 pixels) → 圖片大小正確
+
+#### 2. 前端生成 vs 後端生成
+- **問題**：Vercel 免費版 Serverless Functions 有 4.5MB 請求限制
+- **選擇**：改為前端（瀏覽器端）直接生成文件
+- **優點**：
+  - 完全避免 Vercel 請求大小限制
+  - 減少伺服器負擔
+  - 更快的響應速度（無需網路往返）
+
+### 技術細節
+
+#### 新增檔案：lib/docx/complete-application-client.ts
+```typescript
+// 瀏覽器相容的 Base64 轉換
+function base64ToUint8Array(base64: string): Uint8Array {
+  const base64Data = base64.includes(',') ? base64.split(',')[1] : base64
+  const binaryString = atob(base64Data)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  return bytes
+}
+
+// 瀏覽器端文件生成
+export async function generateCompleteApplicationBlob(
+  caseData: CaseData,
+  summaryContent: string,
+  signedDocumentBase64?: string
+): Promise<Blob> {
+  // ... 建立文件 ...
+  return await Packer.toBlob(doc)  // 瀏覽器用 toBlob
+}
+```
+
+#### 修改檔案：components/document/CompleteApplicationGenerator.tsx
+```typescript
+// 改為使用前端版本
+import { generateCompleteApplicationBlob } from '@/lib/docx/complete-application-client'
+
+const handleGenerate = async () => {
+  // 在瀏覽器端直接生成文件（避免 Vercel 4.5MB 請求限制）
+  const blob = await generateCompleteApplicationBlob(
+    caseData,
+    caseData.generatedDocument!,
+    caseData.signedSurgeonAssessment?.base64Data
+  )
+  // 下載檔案...
+}
+```
+
+### Git 記錄
+1. **Commit** `0449ecf`: fix: 調整段落格式為段前段後 0pt、行距最小值
+2. **Commit** `7c42906`: fix: 移除 convertInchesToTwip，手動計算 twips 值
+3. **Commit** `3716949`: docs: 記錄 2025-12-15 Session 工作內容
+4. **Commit** `4d0a79e`: fix: 移至前端生成文件避免 Vercel 4.5MB 請求限制
+
+### 待辦事項
+- [x] 修正圖片大小單位（twips → EMUs → **Pixels**）
+- [x] 修正 Word 無法開啟的錯誤
+- [x] 修正「上傳資料總大小超過限制」錯誤
+- [x] 建立瀏覽器相容的文件生成器
+- [x] Build 驗證通過
+- [x] Git commit & push
+- [ ] **測試完整流程**
+  - [ ] 在 https://tavi-seven.vercel.app/ 測試
+  - [ ] 確認圖片大小正確（17.5cm 寬）
+  - [ ] 確認可上傳已簽名文件並成功生成
+
+### 專案狀態
+- **Phase 0-3**: ✅ 完成
+- **Phase 4**: ✅ **100% 完成**
+- **Phase 5**: ⏳ 待開始（歷史案例管理）
+- **Phase 6**: ⏳ 待開始（UI/UX 優化）
+- **個案管理**: ✅ 完成
+- **部署**: ✅ https://tavi-seven.vercel.app/
+
+---
