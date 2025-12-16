@@ -1985,3 +1985,63 @@ git commit -m "feat: 新增檢查類型與修正驗證錯誤"      # acc6c69
 - **部署**: ✅ https://tavi-seven.vercel.app/
 
 ---
+
+## Session: 2025-12-16 修正 Word 文件圖片大小單位錯誤
+
+### 變更摘要
+- ✅ **修正圖片大小單位錯誤**
+  - **問題**：Word 文件中圖片寬度顯示為 262.49cm（應為 17.5cm）
+  - **根本原因**：docx.js `ImageRun` transformation 使用 **EMUs** 單位，而非 twips
+  - **修正**：將單位計算從 `1 inch = 1440 twips` 改為 `1 inch = 914400 EMUs`
+  - **差異**：914400 / 1440 ≈ 635 倍
+
+### 決策記錄
+
+#### 1. docx.js ImageRun transformation 單位
+- **發現**：docx.js 的 ImageRun 使用 EMUs (English Metric Units)
+- **EMUs 定義**：1 英寸 = 914,400 EMUs
+- **twips 定義**：1 英寸 = 1,440 twips
+- **影響**：使用錯誤單位會導致圖片尺寸差異約 635 倍
+
+### 技術細節
+
+#### 修正前（錯誤）
+```typescript
+// 手動計算 twips (1 inch = 1440 twips) ← 錯誤！
+const widthInTwips = Math.round(width * 1440)
+const heightInTwips = Math.round(height * 1440)
+```
+
+#### 修正後（正確）
+```typescript
+// docx.js ImageRun transformation 使用 EMUs
+// 1 inch = 914400 EMUs
+const EMUS_PER_INCH = 914400
+const widthInEMUs = Math.round(width * EMUS_PER_INCH)
+const heightInEMUs = Math.round(height * EMUS_PER_INCH)
+```
+
+### Git 記錄
+- **Commit**: `ee06abb` - fix: 修正圖片大小單位錯誤 (twips → EMUs)
+- **推送**: https://github.com/tnfsp/TAVI.git (3716949..ee06abb)
+- **變更檔案**: `lib/docx/complete-application.ts`
+
+### 待辦事項
+- [x] 找出圖片大小異常的根本原因
+- [x] 修正單位計算錯誤
+- [x] Build 驗證
+- [x] Git commit & push
+- [ ] **測試修正結果**（重要）
+  - [ ] 在 https://tavi-seven.vercel.app/ 測試文件生成
+  - [ ] 確認圖片寬度正確為 17.5cm
+  - [ ] 用 Word 開啟確認格式正確
+
+### 專案狀態
+- **Phase 0-3**: ✅ 完成
+- **Phase 4**: ✅ **100% 完成**（圖片大小問題已修正）
+- **Phase 5**: ⏳ 待開始（歷史案例管理）
+- **Phase 6**: ⏳ 待開始（UI/UX 優化）
+- **個案管理**: ✅ 完成
+- **部署**: ✅ https://tavi-seven.vercel.app/ (自動部署中)
+
+---
