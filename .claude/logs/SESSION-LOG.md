@@ -2170,3 +2170,49 @@ const handleGenerate = async () => {
 - **部署**: ✅ https://tavi-seven.vercel.app/
 
 ---
+
+## Session: 2025-12-16 檢查日期與編輯功能
+
+### 變更摘要
+- ✅ 優化 AI Prompt，強調檢查日期的顯示（使用民國年格式）
+- ✅ 為特定檢查類型加入檢查日期欄位
+  - 適用範圍：心臟超音波、心導管、EKG、CXR、肺功能、ABI、Heart CT、心肌灌注掃描
+  - 其他類型（生理測量、Lab、就醫紀錄等）不需要日期
+- ✅ 修正載入 JSON 個案後無法編輯的問題
+  - 表單使用 `key` prop 強制重新初始化
+  - `loadCase` 產生新 ID 確保表單更新
+- ✅ 新增檢查報告編輯功能
+  - 已輸入的檢查可點擊「編輯」按鈕修改
+  - 編輯時表單框線變藍色提示
+  - 自動滾動到輸入區
+
+### 決策記錄
+
+#### 1. 檢查日期欄位範圍
+- **需要日期**：心臟超音波到心肌灌注掃描（8 種）
+- **不需要日期**：生理測量、Lab、就醫紀錄、用藥、診斷列表、A&P、EuroSCORE、STS
+
+#### 2. 表單重新初始化策略
+- React 的 `defaultValues` 只在 mount 時初始化
+- 透過 `key={currentCase.id}` 強制重新 mount
+- `loadCase` 每次產生新 ID 確保 key 改變
+
+### Git 記錄
+1. **Commit** `4e664fc`: feat: 優化 AI 生成 Prompt，強調檢查日期
+2. **Commit** `e2bff33`: feat: 為特定檢查類型加入檢查日期欄位
+3. **Commit** `7459407`: feat: 載入個案後可編輯表單及檢查報告
+
+### 待辦事項
+- [x] AI Prompt 包含檢查日期
+- [x] 檢查輸入頁面加入日期欄位
+- [x] 載入個案後可編輯
+- [x] 檢查報告可編輯
+- [x] Git push 完成
+
+### 專案狀態
+- **Phase 0-4**: ✅ 完成
+- **Phase 5**: ⏳ 待開始（歷史案例管理）
+- **Phase 6**: ⏳ 待開始（UI/UX 優化）
+- **部署**: ✅ https://tavi-seven.vercel.app/
+
+---
