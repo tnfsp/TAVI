@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { FileText, Download, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
+import { generateCompleteApplicationBlob } from '@/lib/docx/complete-application-client'
 import type { CaseData } from '@/types'
 
 interface CompleteApplicationGeneratorProps {
@@ -33,37 +34,14 @@ export function CompleteApplicationGenerator({ caseData }: CompleteApplicationGe
     setError(null)
 
     try {
-      // 呼叫 API 生成文件
-      const response = await fetch('/api/docx/complete-application', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          caseData,
-          summaryContent: caseData.generatedDocument,
-          signedDocumentBase64: caseData.signedSurgeonAssessment?.base64Data,
-        }),
-      })
-
-      if (!response.ok) {
-        // 檢查是否為 JSON 錯誤回應
-        const contentType = response.headers.get('content-type')
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || '文件生成失敗')
-        } else {
-          // 非 JSON 回應，可能是伺服器錯誤
-          const errorText = await response.text()
-          if (errorText.includes('Request Entity Too Large') || response.status === 413) {
-            throw new Error('上傳的資料總大小超過限制（100MB），請減少圖片數量或降低圖片解析度')
-          }
-          throw new Error(`伺服器錯誤 (${response.status}): ${errorText.substring(0, 100)}`)
-        }
-      }
+      // 在瀏覽器端直接生成文件（避免 Vercel 4.5MB 請求限制）
+      const blob = await generateCompleteApplicationBlob(
+        caseData,
+        caseData.generatedDocument!,
+        caseData.signedSurgeonAssessment?.base64Data
+      )
 
       // 下載文件
-      const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
