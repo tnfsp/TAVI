@@ -166,11 +166,11 @@ function createImageParagraph(base64Data: string): Paragraph {
     // 計算適合的顯示尺寸（英寸）
     const { width, height } = calculateImageSize(imgWidth, imgHeight)
 
-    // docx.js ImageRun transformation 使用 EMUs (English Metric Units)
-    // 1 inch = 914400 EMUs
-    const EMUS_PER_INCH = 914400
-    const widthInEMUs = Math.round(width * EMUS_PER_INCH)
-    const heightInEMUs = Math.round(height * EMUS_PER_INCH)
+    // docx.js ImageRun transformation 使用像素（pixels），假設 96 DPI
+    // 參考：https://github.com/dolanmiu/docx/discussions/2709
+    const DPI = 96
+    const widthInPixels = Math.round(width * DPI)
+    const heightInPixels = Math.round(height * DPI)
 
     return new Paragraph({
       children: [
@@ -178,8 +178,8 @@ function createImageParagraph(base64Data: string): Paragraph {
           type: format,
           data: Uint8Array.from(imageBuffer),
           transformation: {
-            width: widthInEMUs,
-            height: heightInEMUs,
+            width: widthInPixels,
+            height: heightInPixels,
           },
         } as any),
       ],
